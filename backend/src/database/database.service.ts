@@ -1,43 +1,39 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { MongooseModuleAsyncOptions } from '@nestjs/mongoose';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '../config/config.service';
-import createClient from 'ioredis';
+import { RedisClientType } from 'redis';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 @Injectable()
 export class DatabaseService {
-  private readonly logger = new Logger(DatabaseService.name);
+    private readonly logger = new Logger(DatabaseService.name);
 
-  constructor(private configService: ConfigService) {}
+    constructor(
+        private readonly configService: ConfigService,
+        @Inject('REDIS_CLIENT') private readonly redisClient: RedisClientType,
+        @InjectConnection() private readonly connection: Connection,
+    ) { }
 
-  createRedisClient() {
-    const redisUri = this.configService.redisUri;
-    this.logger.log(`Connecting to Redis at ${redisUri}`);
+    async pingRedis(): Promise<string> {
+        try {
+            const reply = await this.redisClient.ping();
+            this.logger.log(`✅ Redis PONG: ${reply}`);
+            return reply;
+        } catch (err) {
+            this.logger.error('❌ Redis Error:', err);
+            throw err;
+        }
+    }
 
-    const client = new createClient(redisUri);
-
-    client.on('connect', () => this.logger.log('✅ Redis Connected'));
-    client.on('error', (err) => this.logger.error('❌ Redis Error:', err));
-
-    return client;
-  }
+    async mongoHealthCheck(): Promise<void> {
+        // Use the injected connection rather than the global mongoose.connection
+        const readyState = this.connection.readyState;
+        this.logger.log(`Mongoose connection readyState: ${readyState}`);
+        // readyState: 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+        if (readyState !== 1) {
+            const errorMessage = 'MongoDB is not connected';
+            this.logger.error(errorMessage);
+            throw new Error(errorMessage);
+        }
+    }
 }
-
-export const databaseProviders = {
-  mongoConfig: {
-    inject: [ConfigService],
-    useFactory: (configService: ConfigService) => {
-      const uri = configService.mongoUri;
-      const logger = new Logger('MongoDB');
-      logger.log(`Connecting to MongoDB at ${uri}`);
-      return { uri };
-    },
-  } as MongooseModuleAsyncOptions,
-
-  redisClient: {
-    provide: 'REDIS_CLIENT',
-    inject: [ConfigService],
-    useFactory: (configService: ConfigService) => {
-      return new DatabaseService(configService).createRedisClient();
-    },
-  },
-};

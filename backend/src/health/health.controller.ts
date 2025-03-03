@@ -1,32 +1,16 @@
-import { Controller, Get, Inject } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
-import { Redis } from 'ioredis';
+// Health endpoint that verifies mongo & redis connections
 
-@Controller('health')
+import { Controller, Get } from "@nestjs/common";
+import { HealthService } from "./health.service";
+
+@Controller("health")
 export class HealthController {
-  constructor(
-    @InjectConnection() private readonly mongoConnection: Connection,
-    @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
-  ) {}
+    // Inject HealthService
+    constructor(private readonly healthService: HealthService) { }
 
-  @Get()
-  async checkHealth() {
-    const mongoStatus = this.mongoConnection.readyState === 1 ? 'Connected' : 'Disconnected';
-
-    try {
-      await this.redisClient.ping();
-      return {
-        status: 'OK',
-        mongo: mongoStatus,
-        redis: 'Connected',
-      };
-    } catch (error) {
-      return {
-        status: 'ERROR',
-        mongo: mongoStatus,
-        redis: 'Disconnected',
-      };
+    @Get()
+    async healthCheck(): Promise<{ redis: string; mongo: string }> {
+        return this.healthService.checkDatabaseHealth();
     }
-  }
 }
+

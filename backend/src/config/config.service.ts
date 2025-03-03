@@ -3,76 +3,57 @@ import { ConfigService as NestConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ConfigService {
-  private readonly logger = new Logger(ConfigService.name);
+    private readonly logger = new Logger(ConfigService.name);
 
-  constructor(private nestConfigService: NestConfigService) {}
+    constructor(private readonly nestConfigService: NestConfigService) { }
 
-  private getEnv(key: string, defaultValue: string): string {
-    const value = this.nestConfigService.get<string>(key);
-    if (!value) {
-      this.logger.warn(`Environment variable ${key} is missing. Falling back to default: ${defaultValue}`);
-      return defaultValue;
+    private getRequiredEnv(key: string): string {
+        const value = this.nestConfigService.get<string>(key);
+        if (!value) {
+            this.logger.error(`Missing required environment variable: ${key}`);
+            throw new Error(`Missing required environment variable: ${key}`);
+        }
+        return value;
     }
-    return value;
-  }
 
-  get nodeEnv(): string {
-    return this.getEnv('NODE_ENV', 'development');
-  }
+    get nodeEnv(): string {
+        return this.nestConfigService.get<string>('NODE_ENV') || 'development';
+    }
 
-  get siteDomain(): string {
-    return this.getEnv('SITE_DOMAIN', 'localhost');
-  }
+    get port(): number {
+        const port = this.nestConfigService.get<number>('PORT');
+        if (!port) {
+            this.logger.error(`Missing required environment variable: PORT`);
+            throw new Error('Missing required environment variable: PORT');
+        }
+        return port;
+    }
 
-  get apiPrefix(): string {
-    return this.getEnv('API_PREFIX', 'api');
-  }
+    get apiPrefix(): string {
+        return this.nestConfigService.get<string>('API_PREFIX') || 'api';
+    }
 
-  get port(): number {
-    return Number(this.getEnv('PORT', '3000'));
-  }
+    get corsOrigin(): string {
+        return this.nestConfigService.get<string>('CORS_ORIGIN') || '*';
+    }
 
-  get restApiBase(): string {
-    return this.getEnv('REST_API_BASE', '/api');
-  }
+    get mongoUri(): string {
+        return this.getRequiredEnv('MONGO_URI');
+    }
 
-  get sessionLifetime(): number {
-    return Number(this.getEnv('SESSION_LIFETIME', '86400000'));
-  }
+    get redisUri(): string {
+        return this.getRequiredEnv('REDIS_URI');
+    }
 
-  get cookieSecure(): boolean {
-    return this.getEnv('COOKIE_SECURE', 'false') === 'true';
-  }
+    get cookieSecure(): boolean {
+        return this.nestConfigService.get<boolean>('COOKIE_SECURE')!;
+    }
 
-  get cookieSameSite(): string {
-    return this.getEnv('COOKIE_SAME_SITE', 'lax');
-  }
+    get sessionSecret(): string {
+        return this.getRequiredEnv('SESSION_SECRET');
+    }
 
-  get corsOrigin(): string {
-    return this.getEnv('CORS_ORIGIN', '*');
-  }
-
-  get mongoUri(): string {
-    return this.getEnv('MONGO_URI', 'mongodb://mongo:27017/campusconnect_db');
-  }
-
-  get redisUri(): string {
-    return this.getEnv('REDIS_URI', 'redis://redis:6379');
-  }
-
-  get redisHost(): string {
-    return this.getEnv('REDIS_HOST', 'redis');
-  }
-
-  get redisPort(): number {
-    return Number(this.getEnv('REDIS_PORT', '6379'));
-  }
-
-  get redisPassword(): string {
-    return this.getEnv('REDIS_PASSWORD', '');
-  }
-
-  get sessionSecret(): string {
-    return this.getEnv('SESSION_SECRET', 'super_secret_key');
-  }
+    get encryptionKey(): string {
+        return this.getRequiredEnv('ENCRYPTION_KEY');
+    }
 }

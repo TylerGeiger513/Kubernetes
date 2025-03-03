@@ -1,10 +1,13 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { Request } from 'express';
+import { CustomSession } from '../types/custom-session';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
-    return !!request.session.userId;
+    const session = request.session as CustomSession;
+    Logger.log('Session:', session);
+    return Boolean(session?.userId);
   }
 }

@@ -23,6 +23,7 @@ data:
   LOG_LEVEL: "info"
   NGINX_BACKEND_UPSTREAM: "campus-connect-backend-service:3000"
   NGINX_FRONTEND_UPSTREAM: "campus-connect-frontend-service:80"
+  ENCRYPTION_KEY: "super_secret"
   
   # New keys (from configuration.ts)
   NODE_ENV: "development"         # Change to "production" in production

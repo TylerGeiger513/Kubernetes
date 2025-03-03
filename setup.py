@@ -106,27 +106,33 @@ def shutdown_service(service, force, all_pods):
 
     logging.info("All requested services have been shut down.")
 
-
-        # Also delete services for buildable services
-    # for other services, assume service name equals "service"
+    # Also delete services for buildable services
     for svc in OTHER_SERVICES:
         command = f"kubectl delete service {svc} {force_flag}"
         logging.info(f"Shutting down {svc} with command: {command}")
         run_command(command, check=False)
     
-
 def restart_service(service, nocache):
     """Restart the specified service (or all) by shutting down, then rebuilding (if applicable) and redeploying."""
     logging.info(f"Restarting service(s): {service if service else 'all'}")
-    # Shutdown specified service(s)
     shutdown_service(service, force=True, all_pods=False)
-    # Build images if applicable
     targets = ALL_SERVICES if service is None else [service]
     for svc in targets:
         build_service(svc, nocache)
-    # Deploy Kubernetes manifests for the specified service(s)
     deploy_kubernetes(service)
 
+def rebuild_service(service, nocache):
+    """Rebuild the Docker image(s) for the specified service(s) and trigger a Kubernetes rollout restart."""
+    logging.info(f"Rebuilding service(s): {service if service else 'all buildable services'}")
+    targets = BUILDABLE_SERVICES if service is None else [service]
+    for svc in targets:
+        build_service(svc, nocache)
+        # Trigger a rollout restart for the deployment
+        deployment = f"campus-connect-{svc}"
+        command = f"kubectl rollout restart deployment/{deployment}"
+        logging.info(f"Restarting deployment for {svc} with command: {command}")
+        run_command(command)
+        
 def tail_logs(service):
     """Tail logs for the specified service's deployment."""
     deployment = f"campus-connect-{service}"
@@ -142,7 +148,6 @@ def clear_builds():
         logging.info(f"Removing Docker image: {image}")
         run_command(command, check=False)
 
-    
 def parse_args():
     parser = argparse.ArgumentParser(description="Campus Connect Production Setup Script")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -162,6 +167,11 @@ def parse_args():
     restart_parser = subparsers.add_parser("restart", help="Restart service(s): shutdown then rebuild and redeploy")
     restart_parser.add_argument("target", nargs="?", choices=ALL_SERVICES, help="Service to restart (default: all buildable; non-buildable services will be restarted via deletion)")
     restart_parser.add_argument("--nocache", action="store_true", help="Rebuild images with --no-cache (only applicable for buildable services)")
+
+    # Rebuild command
+    rebuild_parser = subparsers.add_parser("rebuild", help="Rebuild Docker images for service(s) and trigger a Kubernetes rollout restart")
+    rebuild_parser.add_argument("target", nargs="?", choices=BUILDABLE_SERVICES, help="Service to rebuild (default: all buildable)")
+    rebuild_parser.add_argument("--nocache", action="store_true", help="Rebuild images with --no-cache")
 
     # Logs command
     logs_parser = subparsers.add_parser("logs", help="Tail logs for a service")
@@ -192,6 +202,10 @@ def main():
     elif args.command == "restart":
         target = args.target if args.target else None
         restart_service(target, args.nocache)
+
+    elif args.command == "rebuild":
+        target = args.target if args.target else None
+        rebuild_service(target, args.nocache)
 
     elif args.command == "logs":
         tail_logs(args.target)
