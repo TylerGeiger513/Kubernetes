@@ -15,4 +15,4 @@ ENV NODE_ENV=production
 # Expose the backend port from the .env configuration
 EXPOSE ${BACKEND_PORT}
 
-CMD ["node", "src/app.js"]
+CMD ["npm", "run", "start"]

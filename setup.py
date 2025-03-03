@@ -11,7 +11,8 @@ logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] %(message)s')
 # Buildable services: you build images for these.
 BUILDABLE_SERVICES = ['backend', 'frontend']
 # All services: includes buildable and stateful (which you don't build, but can restart/shutdown).
-ALL_SERVICES = ['backend', 'frontend', 'mongo', 'redis' 'mongo-pvc']
+ALL_SERVICES = ['backend', 'frontend']
+OTHER_SERVICES = ['mongo', 'redis', 'mongo-pvc', 'ingress'] 
 
 # Folder where Kubernetes manifests are stored
 K8S_FOLDER = "kubernetes"
@@ -68,18 +69,51 @@ def deploy_kubernetes(service=None):
         run_command(command)
 
 def shutdown_service(service, force, all_pods):
-    """Shutdown the specified service or all services via kubectl delete deployment."""
+    """Shutdown the specified service or all services via kubectl delete."""
     force_flag = "--grace-period=0 --force" if force else ""
+
     if all_pods:
-        targets = ALL_SERVICES
-    else:
-        targets = ALL_SERVICES if service is None else [service]
+        logging.info("Shutting down all Campus Connect services (including stateful services like MongoDB & Redis)...")
+        run_command(f"kubectl delete deployment --all {force_flag}", check=False)
+        run_command(f"kubectl delete pod --all {force_flag}", check=False)
+        run_command(f"kubectl delete service --all {force_flag}", check=False)
+        return
+    
+    # Delete buildable service deployments
+    targets = ALL_SERVICES if service is None else [service]
     for svc in targets:
-        # For stateful services, assume deployment name equals "campus-connect-<service>"
         deployment = f"campus-connect-{svc}"
         command = f"kubectl delete deployment {deployment} {force_flag}"
+        logging.info(f"Shutting down {svc} deployment with command: {command}")
+        run_command(command, check=False)
+
+    # Explicitly delete MongoDB & Redis deployments
+    for stateful_svc in ["mongo", "redis"]:
+        command = f"kubectl delete deployment {stateful_svc} {force_flag}"
+        logging.info(f"Shutting down {stateful_svc} deployment with command: {command}")
+        run_command(command, check=False)
+
+        # Delete any remaining pods for MongoDB & Redis
+        command = f"kubectl delete pod -l app={stateful_svc} {force_flag}"
+        logging.info(f"Deleting remaining {stateful_svc} pods with command: {command}")
+        run_command(command, check=False)
+
+    # Also delete services
+    for svc in OTHER_SERVICES + ALL_SERVICES:
+        command = f"kubectl delete service {svc} {force_flag}"
+        logging.info(f"Shutting down {svc} service with command: {command}")
+        run_command(command, check=False)
+
+    logging.info("All requested services have been shut down.")
+
+
+        # Also delete services for buildable services
+    # for other services, assume service name equals "service"
+    for svc in OTHER_SERVICES:
+        command = f"kubectl delete service {svc} {force_flag}"
         logging.info(f"Shutting down {svc} with command: {command}")
         run_command(command, check=False)
+    
 
 def restart_service(service, nocache):
     """Restart the specified service (or all) by shutting down, then rebuilding (if applicable) and redeploying."""
@@ -108,6 +142,7 @@ def clear_builds():
         logging.info(f"Removing Docker image: {image}")
         run_command(command, check=False)
 
+    
 def parse_args():
     parser = argparse.ArgumentParser(description="Campus Connect Production Setup Script")
     subparsers = parser.add_subparsers(dest="command", required=True)

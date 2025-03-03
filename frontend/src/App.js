@@ -1,14 +1,19 @@
-// frontend/src/App.js
 import React, { useEffect, useState } from 'react';
 
 function App() {
   const [testMessage, setTestMessage] = useState('Loading...');
 
   useEffect(() => {
-    fetch('/api/tests')
+    fetch('/api/health')
       .then(response => response.json())
-      .then(data => setTestMessage(data.message))
-      .catch(err => setTestMessage('Error connecting to API'));
+      .then(data => {
+        console.log('API Response:', data); 
+        setTestMessage(`Backend Status: ${data.status} | MongoDB: ${data.mongo} | Redis: ${data.redis}`);
+      })
+      .catch(err => {
+        console.error('Error connecting to API:', err); 
+        setTestMessage('Error connecting to API');
+      });
   }, []);
 
   return (
