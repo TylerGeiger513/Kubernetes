@@ -1,0 +1,15 @@
+{
+    "name": "campus-connect-frontend",
+    "version": "1.0.0",
+    "description": "Bare-bones React front-end for Campus Connect",
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build"
+    },
+    "dependencies": {
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0",
+      "react-scripts": "5.0.1"
+    }
+  }
+  
