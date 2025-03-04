@@ -1,18 +1,28 @@
 import React, { useState } from 'react';
-import { FaCog, FaUser, FaVolumeUp } from 'react-icons/fa';
+import { FaCog, FaUser, FaVolumeUp, FaTimes } from 'react-icons/fa';
 import { HiPaperAirplane } from "react-icons/hi2";
 import './ServerUI.css';
 
 const ServerUI = () => {
   const [selectedChannel, setSelectedChannel] = useState('# general');
+  const [selectedUser, setSelectedUser] = useState(null); // State for selected user
+  const [isPopupOpen, setIsPopupOpen] = useState(false); // State for popup visibility
 
   return (
     <div className="app-container">
       <TopBar />
       <MainContainer 
         selectedChannel={selectedChannel} 
-        setSelectedChannel={setSelectedChannel} 
+        setSelectedChannel={setSelectedChannel}
+        setSelectedUser={setSelectedUser} // Pass setter to MainContainer
+        setIsPopupOpen={setIsPopupOpen}   // Pass setter to MainContainer
       />
+      {isPopupOpen && (
+        <UserProfilePopup
+          user={selectedUser}
+          onClose={() => setIsPopupOpen(false)}
+        />
+      )}
     </div>
   );
 };
@@ -27,14 +37,17 @@ const TopBar = () => (
   </div>
 );
 
-const MainContainer = ({ selectedChannel, setSelectedChannel }) => (
+const MainContainer = ({ selectedChannel, setSelectedChannel, setSelectedUser, setIsPopupOpen }) => (
   <div className="main-container">
     <LeftSidebar 
       selectedChannel={selectedChannel} 
       setSelectedChannel={setSelectedChannel} 
     />
     <CentralArea selectedChannel={selectedChannel} />
-    <RightSidebar />
+    <RightSidebar 
+      setSelectedUser={setSelectedUser} 
+      setIsPopupOpen={setIsPopupOpen} 
+    />
   </div>
 );
 
@@ -97,29 +110,68 @@ const CentralArea = ({ selectedChannel }) => (
   </div>
 );
 
-const RightSidebar = () => (
-  <div className="right-sidebar">
-    <h3>ONLINE — 2</h3>
-    <div className="user-list">
-      <User name="user1" status="online" />
-      <User name="user2" status="online" />
-    </div>
-    
-    <h3>OFFLINE — 4</h3>
-    <div className="user-list">
-      <User name="user3" status="offline" />
-      <User name="user4" status="offline" />
-      <User name="user5" status="offline" />
-      <User name="user6" status="offline" />
-    </div>
-  </div>
-);
+const RightSidebar = ({ setSelectedUser, setIsPopupOpen }) => {
+  const onlineUsers = ['user1', 'user2'];
+  const offlineUsers = ['user3', 'user4', 'user5', 'user6'];
 
-const User = ({ name, status }) => (
-  <div className="user">
+  return (
+    <div className="right-sidebar">
+      <h3>ONLINE — {onlineUsers.length}</h3>
+      <div className="user-list">
+        {onlineUsers.map(name => (
+          <User
+            key={name}
+            name={name}
+            status="online"
+            onClick={() => {
+              setSelectedUser({ name, status: 'online' });
+              setIsPopupOpen(true);
+            }}
+          />
+        ))}
+      </div>
+      
+      <h3>OFFLINE — {offlineUsers.length}</h3>
+      <div className="user-list">
+        {offlineUsers.map(name => (
+          <User
+            key={name}
+            name={name}
+            status="offline"
+            onClick={() => {
+              setSelectedUser({ name, status: 'offline' });
+              setIsPopupOpen(true);
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const User = ({ name, status, onClick }) => (
+  <div className="user" onClick={onClick} style={{ cursor: 'pointer' }}>
     <div className={`status-dot ${status}`} />
     <div className="avatar">{name.slice(-1)}</div>
     <span>{name}</span>
+  </div>
+);
+
+const UserProfilePopup = ({ user, onClose }) => (
+  <div className="popup-overlay" onClick={onClose}>
+    <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+      <button className="close-button" onClick={onClose}>
+        <FaTimes />
+      </button>
+      <div className="user-profile">
+        <div className="profile-avatar">{user.name.slice(-1)}</div>
+        <h2>{user.name}</h2>
+        <div className="status-container">
+          <div className={`status-dot ${user.status}`} />
+          <span>{user.status}</span>
+        </div>
+      </div>
+    </div>
   </div>
 );
 

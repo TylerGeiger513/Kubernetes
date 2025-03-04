@@ -177,11 +177,7 @@ body {
     margin-top: 20px;
 }
 
-.user {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
+
 
 .status-dot {
     width: 10px;
@@ -282,4 +278,77 @@ h3 {
   .channel-list .fa-volume-up {
     vertical-align: middle;
     font-size: 0.9rem;
+  }
+
+  /* Popup Styles */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; 
+  }
+  
+  .popup-content {
+    background-color: #2C2F33; /* Matches sidebar background */
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    position: relative;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #DCDDDE; /* Matches icon color */
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .close-button:hover {
+    color: #ffffff; /* Matches icon hover color */
+  }
+  
+  .user-profile {
+    text-align: center;
+  }
+  
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #7289DA; /* Matches avatar color */
+    text-align: center;
+    line-height: 80px;
+    font-size: 40px;
+    margin: 0 auto 10px;
+  }
+  
+  .status-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px; 
+  }
+  
+  .user {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    margin: 2px 0;
+    cursor: pointer; 
+  }
+  
+  .user:hover {
+    background-color: #3A3F45;
   }
