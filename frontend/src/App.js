@@ -1,5 +1,6 @@
 // frontend/src/App.js
 import React, { useEffect, useState } from 'react';
+import ServerUI from './components/ServerUI.jsx';
 
 function App() {
   const [testMessage, setTestMessage] = useState('Loading...');
@@ -12,9 +13,8 @@ function App() {
   }, []);
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>Campus Connect Test</h1>
-      <p>{testMessage}</p>
+    <div className="App">
+      <ServerUI />
     </div>
   );
 }
