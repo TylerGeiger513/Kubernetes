@@ -134,7 +134,11 @@ body {
 
 .message {
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: 2px;
+}
+
+.message:not(:first-child) {
+    margin-top: -6px;
 }
 
 .avatar {
@@ -150,6 +154,15 @@ body {
 
 .message-content {
     flex: 1;
+}
+
+.message-content.collapsed {
+    margin-left: 55px; /* Match avatar width + margin */
+}
+
+.message-content.collapsed p {
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 .username {
@@ -206,9 +219,9 @@ h3 {
     flex: 1;
     overflow-y: auto;
     padding-bottom: 20px;
-  }
+}
   
-  .chat-input-container {
+.chat-input-container {
     display: flex;
     align-items: center;
     padding: 20px;
@@ -217,7 +230,7 @@ h3 {
     margin: 0 20px 20px 20px;
   }
   
-  .chat-input {
+.chat-input {
     flex: 1;
     padding: 12px 16px;
     background-color: #23272A;
@@ -235,7 +248,7 @@ h3 {
 
 
 
-  .central-area {
+.central-area {
     display: flex;
     width: 55%;
     flex-direction: column;
@@ -250,19 +263,19 @@ h3 {
     font-size: 1.2rem;
     transition: color 0.2s;
     cursor: pointer;
-  }
+}
   
-  .icon:hover {
+.icon:hover {
     color: #ffffff;
-  }
+}
   
-  .send-icon {
+.send-icon {
     color: white;
     font-size: 1.4rem;
-  }
+}
   
-  .send-button {
-    background-color: var(--primary-a0);
+.send-button {
+    background-color: #7289DA;
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -273,12 +286,17 @@ h3 {
     cursor: pointer;
     transition: background-color 0.2s;
     padding: 0; 
-  }
+}
  
-  .channel-list .fa-volume-up {
+
+.send-button:hover {
+    background-color: #677bc4 !important;
+}
+
+.channel-list .fa-volume-up {
     vertical-align: middle;
     font-size: 0.9rem;
-  }
+}
 
   /* Popup Styles */
 .popup-overlay {
@@ -294,15 +312,15 @@ h3 {
     z-index: 1000; 
   }
   
-  .popup-content {
+.popup-content {
     background-color: #2C2F33; /* Matches sidebar background */
     padding: 20px;
     border-radius: 10px;
     width: 300px;
     position: relative;
-  }
+}
   
-  .close-button {
+.close-button {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -311,17 +329,17 @@ h3 {
     color: #DCDDDE; /* Matches icon color */
     font-size: 20px;
     cursor: pointer;
-  }
+}
   
-  .close-button:hover {
+.close-button:hover {
     color: #ffffff; /* Matches icon hover color */
-  }
+}
   
-  .user-profile {
+.user-profile {
     text-align: center;
-  }
+}
   
-  .profile-avatar {
+.profile-avatar {
     width: 80px;
     height: 80px;
     border-radius: 50%;
@@ -330,16 +348,16 @@ h3 {
     line-height: 80px;
     font-size: 40px;
     margin: 0 auto 10px;
-  }
+}
   
   .status-container {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 5px; 
-  }
+}
   
-  .user {
+.user {
     display: flex;
     align-items: center;
     padding: 8px;
@@ -347,8 +365,43 @@ h3 {
     transition: background-color 0.2s;
     margin: 2px 0;
     cursor: pointer; 
-  }
+}
   
-  .user:hover {
+.user:hover {
     background-color: #3A3F45;
-  }
+}
+
+/* Custom Scrollbar */
+.chat-messages::-webkit-scrollbar,
+.left-sidebar::-webkit-scrollbar,
+.right-sidebar::-webkit-scrollbar {
+  width: 8px; 
+  height: 6px; 
+}
+
+.chat-messages::-webkit-scrollbar-track,
+.left-sidebar::-webkit-scrollbar-track,
+.right-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px; /* Creates breathing room around scrollbar */
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: transparent;
+  transition: background 0.3s;
+}
+
+.chat-messages:hover::-webkit-scrollbar-thumb {
+  background: #4F545C;
+}
+
+/* Optional: Hide scrollbar when not scrolling */
+.chat-messages,
+.left-sidebar,
+.right-sidebar {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #4F545C #2C2F33; /* For Firefox */
+}
+
+
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaCog, FaUser, FaVolumeUp, FaTimes } from 'react-icons/fa';
 import { HiPaperAirplane } from "react-icons/hi2";
 import './ServerUI.css';
@@ -11,8 +11,8 @@ const ServerUI = () => {
   return (
     <div className="app-container">
       <TopBar />
-      <MainContainer 
-        selectedChannel={selectedChannel} 
+      <MainContainer
+        selectedChannel={selectedChannel}
         setSelectedChannel={setSelectedChannel}
         setSelectedUser={setSelectedUser} // Pass setter to MainContainer
         setIsPopupOpen={setIsPopupOpen}   // Pass setter to MainContainer
@@ -39,14 +39,14 @@ const TopBar = () => (
 
 const MainContainer = ({ selectedChannel, setSelectedChannel, setSelectedUser, setIsPopupOpen }) => (
   <div className="main-container">
-    <LeftSidebar 
-      selectedChannel={selectedChannel} 
-      setSelectedChannel={setSelectedChannel} 
+    <LeftSidebar
+      selectedChannel={selectedChannel}
+      setSelectedChannel={setSelectedChannel}
     />
     <CentralArea selectedChannel={selectedChannel} />
-    <RightSidebar 
-      setSelectedUser={setSelectedUser} 
-      setIsPopupOpen={setIsPopupOpen} 
+    <RightSidebar
+      setSelectedUser={setSelectedUser}
+      setIsPopupOpen={setIsPopupOpen}
     />
   </div>
 );
@@ -54,7 +54,7 @@ const MainContainer = ({ selectedChannel, setSelectedChannel, setSelectedUser, s
 const LeftSidebar = ({ selectedChannel, setSelectedChannel }) => (
   <div className="left-sidebar">
     <div className="server-header">WCUPA</div>
-    
+
     <div className="channel-header">TEXT CHANNELS</div>
     <ul className="channel-list">
       {['# general', '# stuff', '# other'].map((channel) => (
@@ -67,7 +67,7 @@ const LeftSidebar = ({ selectedChannel, setSelectedChannel }) => (
         </li>
       ))}
     </ul>
-    
+
     <div className="channel-header">VOICE CHANNELS</div>
     <ul className="channel-list">
       <li className="channel">
@@ -77,38 +77,100 @@ const LeftSidebar = ({ selectedChannel, setSelectedChannel }) => (
   </div>
 );
 
-const CentralArea = ({ selectedChannel }) => (
-  <div className="central-area">
-    <div className="chat-messages">
-      <header>
-        <h1 className="header-title">{selectedChannel}</h1>
-        <p className="header-subtitle">This is the beginning of this server.</p>
-        <p className="header-timestamp">February 3, 2025</p>
-      </header>
-      
-      <div className="message">
-        <div className="avatar">0</div>
-        <div className="message-content">
-          <span className="username">user</span>
-          <span className="timestamp">2/3/25, 2:58 PM</span>
-          <p>hi</p>
-          <p>blah</p>
-        </div>
+const CentralArea = ({ selectedChannel }) => {
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState('');
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = () => {
+    if (!inputText.trim()) return;
+
+    const newMessage = {
+      user: 'You',
+      content: inputText.trim(),
+      timestamp: new Date().toLocaleString('en-US', {
+        month: 'numeric',
+        day: 'numeric',
+        year: '2-digit',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }),
+      id: Date.now(),
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    setInputText('');
+  };
+
+  return (
+    <div className="central-area">
+      <div className="chat-messages">
+        <header>
+          <h1 className="header-title">{selectedChannel}</h1>
+          <p className="header-subtitle">This is the beginning of this server.</p>
+          <p className="header-timestamp">February 3, 2025</p>
+        </header>
+
+        {messages.map((message, index) => {
+          const prevMessage = messages[index - 1];
+          const showUserInfo = !prevMessage || prevMessage.user !== message.user;
+
+          return (
+            <div className="message" key={message.id}>
+              {showUserInfo ? (
+                <>
+                  <div className="avatar">Y</div>
+                  <div className="message-content">
+                    <span className="username">{message.user}</span>
+                    <span className="timestamp">{message.timestamp}</span>
+                    {message.content.split('\n').map((line, i) => (
+                      <p key={i}>{line}</p>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="message-content collapsed">
+                  {message.content.split('\n').map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="chat-input-container">
+        <input
+          type="text"
+          placeholder={`Message ${selectedChannel}`}
+          className="chat-input"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault(); // Prevent new line
+              handleSend();
+            }
+          }}
+        />
+        <button className="send-button" onClick={handleSend}>
+          <HiPaperAirplane className="send-icon" />
+        </button>
       </div>
     </div>
-    
-    <div className="chat-input-container">
-      <input 
-        type="text" 
-        placeholder={`Message ${selectedChannel}`}
-        className="chat-input"
-      />
-      <button className="send-button">
-        <HiPaperAirplane className="send-icon" />
-      </button>
-    </div>
-  </div>
-);
+  );
+};
 
 const RightSidebar = ({ setSelectedUser, setIsPopupOpen }) => {
   const onlineUsers = ['user1', 'user2'];
@@ -130,7 +192,7 @@ const RightSidebar = ({ setSelectedUser, setIsPopupOpen }) => {
           />
         ))}
       </div>
-      
+
       <h3>OFFLINE — {offlineUsers.length}</h3>
       <div className="user-list">
         {offlineUsers.map(name => (
