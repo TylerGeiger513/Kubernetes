@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaCog, FaUser, FaVolumeUp } from 'react-icons/fa';
-import { MdSend } from 'react-icons/md';
 import { HiPaperAirplane } from "react-icons/hi2";
 import './ServerUI.css';
 
 const ServerUI = () => {
+  const [selectedChannel, setSelectedChannel] = useState('# general');
+
   return (
     <div className="app-container">
       <TopBar />
-      <MainContainer />
+      <MainContainer 
+        selectedChannel={selectedChannel} 
+        setSelectedChannel={setSelectedChannel} 
+      />
     </div>
   );
 };
@@ -23,38 +27,48 @@ const TopBar = () => (
   </div>
 );
 
-const MainContainer = () => (
+const MainContainer = ({ selectedChannel, setSelectedChannel }) => (
   <div className="main-container">
-    <LeftSidebar />
-    <CentralArea />
+    <LeftSidebar 
+      selectedChannel={selectedChannel} 
+      setSelectedChannel={setSelectedChannel} 
+    />
+    <CentralArea selectedChannel={selectedChannel} />
     <RightSidebar />
   </div>
 );
 
-const LeftSidebar = () => (
+const LeftSidebar = ({ selectedChannel, setSelectedChannel }) => (
   <div className="left-sidebar">
     <div className="server-header">WCUPA</div>
     
     <div className="channel-header">TEXT CHANNELS</div>
     <ul className="channel-list">
-    <li className="channel"># general</li>
-      <li className="channel"># stuff</li>
-      <li className="channel"># other</li>
+      {['# general', '# stuff', '# other'].map((channel) => (
+        <li
+          key={channel}
+          className={`channel ${selectedChannel === channel ? 'selected' : ''}`}
+          onClick={() => setSelectedChannel(channel)}
+        >
+          {channel}
+        </li>
+      ))}
     </ul>
     
     <div className="channel-header">VOICE CHANNELS</div>
     <ul className="channel-list">
-    <li className="channel"><FaVolumeUp style={{ marginRight: 8 }} />general</li>
+      <li className="channel">
+        <FaVolumeUp style={{ marginRight: 8 }} /> General
+      </li>
     </ul>
   </div>
 );
 
-const CentralArea = () => (
+const CentralArea = ({ selectedChannel }) => (
   <div className="central-area">
     <div className="chat-messages">
-
       <header>
-        <h1 className="header-title"># general</h1>
+        <h1 className="header-title">{selectedChannel}</h1>
         <p className="header-subtitle">This is the beginning of this server.</p>
         <p className="header-timestamp">February 3, 2025</p>
       </header>
@@ -73,7 +87,7 @@ const CentralArea = () => (
     <div className="chat-input-container">
       <input 
         type="text" 
-        placeholder="Message #general"
+        placeholder={`Message ${selectedChannel}`}
         className="chat-input"
       />
       <button className="send-button">

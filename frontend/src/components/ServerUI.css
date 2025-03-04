@@ -80,12 +80,23 @@ body {
     padding: 8px;
     cursor: pointer;
     color: #DCDDDE;
-}
+    border-radius: 5px;
+    transition: background-color 0.2s;
+    margin: 2px 0;
+  }
 
 .channel.selected {
     background-color: #4F545C;
     border-radius: 5px;
     color: white;
+}
+
+.channel.selected:hover {
+    background-color: #5D6269;
+}
+
+.channel:hover {
+    background-color: #3A3F45;
 }
 
 .channel-header {
