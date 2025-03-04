@@ -45,20 +45,36 @@ const LeftSidebar = () => (
 
 const CentralArea = () => (
   <div className="central-area">
-    <header>
-      <h1 className="header-title"># general</h1>
-      <p className="header-subtitle">This is the beginning of this server.</p>
-      <p className="header-timestamp">February 3, 2025</p>
-    </header>
-    
-    <div className="message">
-      <div className="avatar">0</div>
-      <div className="message-content">
-        <span className="username">user</span>
-        <span className="timestamp">2/3/25, 2:58 PM</span>
-        <p>hi</p>
-        <p>blah</p>
+    <div className="chat-messages">
+
+      <header>
+        <h1 className="header-title"># general</h1>
+        <p className="header-subtitle">This is the beginning of this server.</p>
+        <p className="header-timestamp">February 3, 2025</p>
+      </header>
+      
+      <div className="message">
+        <div className="avatar">0</div>
+        <div className="message-content">
+          <span className="username">user</span>
+          <span className="timestamp">2/3/25, 2:58 PM</span>
+          <p>hi</p>
+          <p>blah</p>
+        </div>
       </div>
+    </div>
+    
+    <div className="chat-input-container">
+      <input 
+        type="text" 
+        placeholder="Message #general"
+        className="chat-input"
+      />
+      <button className="send-button">
+        <svg viewBox="0 0 24 24" width="24" height="24" className="send-icon">
+          <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+        </svg>
+      </button>
     </div>
   </div>
 );
