@@ -225,6 +225,34 @@ h3 {
     outline: none;
     border-color: #7289DA;
   }
+
+
+
+  .central-area {
+    display: flex;
+    width: 55%;
+    flex-direction: column;
+    background-color: #23272A;
+    padding: 20px;
+    overflow-y: auto;
+    height: 100%; 
+}
+
+.icon {
+    color: #DCDDDE;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  
+  .icon:hover {
+    color: #ffffff;
+  }
+  
+  .send-icon {
+    color: white;
+    font-size: 1.4rem;
+  }
   
   .send-button {
     background-color: var(--primary-a0);
@@ -237,20 +265,10 @@ h3 {
     justify-content: center;
     cursor: pointer;
     transition: background-color 0.2s;
+    padding: 0; 
   }
-  
-  
-  .send-icon {
-    color: white;
+ 
+  .channel-list .fa-volume-up {
+    vertical-align: middle;
+    font-size: 0.9rem;
   }
-  
-
-  .central-area {
-    display: flex;
-    width: 55%;
-    flex-direction: column;
-    background-color: #23272A;
-    padding: 20px;
-    overflow-y: auto;
-    height: 100%; 
-}

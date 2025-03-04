@@ -1,4 +1,7 @@
 import React from 'react';
+import { FaCog, FaUser, FaVolumeUp } from 'react-icons/fa';
+import { MdSend } from 'react-icons/md';
+import { HiPaperAirplane } from "react-icons/hi2";
 import './ServerUI.css';
 
 const ServerUI = () => {
@@ -13,7 +16,10 @@ const ServerUI = () => {
 const TopBar = () => (
   <div className="top-bar">
     <div className="server-info">Campus Connect</div>
-    <div className="icons">⚙️   👤</div>
+    <div className="icons">
+      <FaCog className="icon" style={{ marginRight: 15 }} />
+      <FaUser className="icon" />
+    </div>
   </div>
 );
 
@@ -31,14 +37,14 @@ const LeftSidebar = () => (
     
     <div className="channel-header">TEXT CHANNELS</div>
     <ul className="channel-list">
-      <li className="channel selected"># general</li>
+    <li className="channel"># general</li>
       <li className="channel"># stuff</li>
       <li className="channel"># other</li>
     </ul>
     
     <div className="channel-header">VOICE CHANNELS</div>
     <ul className="channel-list">
-      <li className="channel">🔊 General</li>
+    <li className="channel"><FaVolumeUp style={{ marginRight: 8 }} />general</li>
     </ul>
   </div>
 );
@@ -71,9 +77,7 @@ const CentralArea = () => (
         className="chat-input"
       />
       <button className="send-button">
-        <svg viewBox="0 0 24 24" width="24" height="24" className="send-icon">
-          <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-        </svg>
+        <HiPaperAirplane className="send-icon" />
       </button>
     </div>
   </div>
