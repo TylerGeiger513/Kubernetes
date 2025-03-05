@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import TopBar from '../components/TopBar'; 
+import TopBar from '../components/TopBar'; // Import the reusable TopBar
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -23,7 +23,7 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
-      <TopBar title="My Profile" />
+      <TopBar title="My Profile" /> {/* Use reusable TopBar with custom title */}
       <div className="profile-content">
         <h2>Friends</h2>
         <div className="add-friend">

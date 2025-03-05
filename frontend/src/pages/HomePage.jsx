@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaPlus, FaCheckSquare, FaRegSquare } from 'react-icons/fa';
-import TopBar from '../components/TopBar'; 
+import TopBar from '../components/TopBar'; // Import the reusable TopBar
 import './HomePage.css';
 
 const HomePage = () => {

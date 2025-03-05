@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { HiPaperAirplane } from 'react-icons/hi2';
-import TopBar from './TopBar';
+import TopBar from '../components/TopBar';
 import './ChatsUI.css';
 
 // Sample chat data

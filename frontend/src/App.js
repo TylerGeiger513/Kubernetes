@@ -1,7 +1,7 @@
 // frontend/src/App.js
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import ServerUI from './pages/ServerUI.jsx';
+import ChatsUI from './pages/ChatsUI.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import HomePage from './pages/HomePage.jsx'
 import Signup from './pages/Signup.jsx';
@@ -24,7 +24,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/" element={<ServerUI />} />
+        <Route path="/" element={<ChatsUI />} />
       </Routes>
     </Router>
   );
