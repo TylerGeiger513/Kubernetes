@@ -8,6 +8,7 @@
     padding: 20px 0 0 0;
     width: 100%;
     gap: 15px;
+    border-radius:5px;
 }
   
 .add-friend {
@@ -72,6 +73,8 @@
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.2s;
+    margin-left: 10px;
+    margin-right: 10px;
 }
   
 .friend-item:hover {
