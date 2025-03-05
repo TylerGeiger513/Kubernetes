@@ -60,12 +60,12 @@
   
   .friend-input:focus {
     outline: none;
-    border-color: #7289DA;
+    border-color: #29b9f2;
   }
   
   .add-button {
     padding: 10px 15px;
-    background-color: #7289DA;
+    background-color: #29b9f2;
     border: none;
     color: white;
     border-radius: 5px;
@@ -133,7 +133,7 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: #7289DA;
+    background-color: #29b9f2;
     text-align: center;
     line-height: 30px;
     margin-right: 10px;
@@ -189,7 +189,7 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background-color: #7289DA;
+    background-color: #29b9f2;
     text-align: center;
     line-height: 80px;
     font-size: 40px;

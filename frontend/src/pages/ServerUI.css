@@ -114,7 +114,7 @@ body {
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background-color: #7289DA;
+    background-color: #29b9f2;
     text-align: center;
     line-height: 30px;
     margin: 5px;
@@ -147,7 +147,7 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: #7289DA;
+    background-color: #29b9f2;
     text-align: center;
     line-height: 40px;
     margin-right: 15px;
@@ -245,7 +245,7 @@ h3 {
   
   .chat-input:focus {
     outline: none;
-    border-color: #7289DA;
+    border-color: #29b9f2;
   }
 
 
@@ -277,7 +277,7 @@ h3 {
 }
   
 .send-button {
-    background-color: #7289DA;
+    background-color: #29b9f2;
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -345,7 +345,7 @@ h3 {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background-color: #7289DA; /* Matches avatar color */
+    background-color: #29b9f2; /* Matches avatar color */
     text-align: center;
     line-height: 80px;
     font-size: 40px;
