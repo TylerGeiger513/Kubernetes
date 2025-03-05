@@ -38,7 +38,8 @@ body {
     padding: 10px;
     overflow-y: auto;
     height: 100%; 
-    margin-top: 20px;
+    margin-top: 40px;
+
 }
 
 .right-sidebar {
@@ -47,7 +48,7 @@ body {
     padding: 10px;
     overflow-y: auto;
     height: 100%; 
-    margin-top: 20px;
+    margin-top: 40px;
 }
 
 .server-header {
