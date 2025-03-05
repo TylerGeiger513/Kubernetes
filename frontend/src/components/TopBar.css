@@ -15,20 +15,30 @@
 
 .icons {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 25px;
 }
 
 .top-bar-icon {
   color: #DCDDDE;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   transition: color 0.2s;
   cursor: pointer;
 }
 
+.chat-icon {
+  font-size: 1.8rem;
+}
+
 .home-icon {
-  font-size: 1.35rem; 
+  font-size: 1.9rem;
 }
 
 .top-bar-icon:hover {
   color: #ffffff;
+}
+
+.icon-link {
+  display: flex;
+  align-items: center;
 }

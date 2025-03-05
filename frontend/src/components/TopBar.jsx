@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaUser, FaHome } from 'react-icons/fa';
+import { FaComments, FaUser, FaHome } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import './TopBar.css';
 
@@ -7,6 +7,9 @@ const TopBar = () => (
   <div className="top-bar">
     <div className="server-info">Campus Connect</div>
     <div className="icons">
+      <Link to="/" className="icon-link">
+        <FaComments className="top-bar-icon chat-icon" />
+      </Link>
       <Link to="/home">
         <FaHome className="top-bar-icon home-icon" />
       </Link>
