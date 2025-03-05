@@ -49,7 +49,10 @@ const CentralArea = ({ selectedChat }) => {
           const showUserInfo = !prevMessage || prevMessage.user !== message.user;
 
           return (
-            <div className="message" key={message.id}>
+            <div
+              className={`message ${!showUserInfo ? 'collapsed-message' : ''}`}
+              key={message.id}
+            >
               {showUserInfo ? (
                 <>
                   <div className="avatar">Y</div>

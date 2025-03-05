@@ -144,7 +144,7 @@ body {
 }
 
 .message-content.collapsed {
-    margin-left: 55px; /* Match avatar width + margin */
+    margin-left: 40px; 
 }
 
 .message-content.collapsed p {
