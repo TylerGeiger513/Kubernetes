@@ -1,6 +1,8 @@
 // frontend/src/App.js
 import React, { useEffect, useState } from 'react';
-import ServerUI from './components/ServerUI.jsx';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import ServerUI from './pages/ServerUI.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
 
 function App() {
   const [testMessage, setTestMessage] = useState('Loading...');
@@ -13,9 +15,12 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
-      <ServerUI />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/profile" element={<ProfilePage />} /> {/* Use element prop instead of component */}
+        <Route path="/" element={<ServerUI />} />
+      </Routes>
+    </Router>
   );
 }
 

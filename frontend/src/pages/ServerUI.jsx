@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FaCog, FaUser, FaVolumeUp, FaTimes } from 'react-icons/fa';
 import { HiPaperAirplane } from "react-icons/hi2";
+import { Link } from 'react-router-dom';
 import './ServerUI.css';
 
 const ServerUI = () => {
@@ -32,7 +33,9 @@ const TopBar = () => (
     <div className="server-info">Campus Connect</div>
     <div className="icons">
       <FaCog className="icon" style={{ marginRight: 15 }} />
-      <FaUser className="icon" />
+      <Link to="/profile">
+        <FaUser className="icon" />
+      </Link>
     </div>
   </div>
 );
