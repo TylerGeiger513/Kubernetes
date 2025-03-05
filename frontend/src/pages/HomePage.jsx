@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FaPlus, FaCheckSquare, FaRegSquare } from 'react-icons/fa';
-import TopBar from '../components/TopBar';
-import FriendsList from '../components/FriendsList';
+import TopBar from './TopBar'; // Import the reusable TopBar
+import FriendsList from './FriendsList'
 import './HomePage.css';
 
 const HomePage = () => {
+  // Sample friends data
   const [friends] = useState([
     { id: 1, name: 'Alice', profilePic: 'alice.jpg' },
     { id: 2, name: 'Bob', profilePic: 'bob.jpg' },
     { id: 3, name: 'Charlie', profilePic: 'charlie.jpg' },
   ]);
 
+  // Sample chats data
   const [chats, setChats] = useState([
     { id: 1, name: 'General Chat', participants: [1, 2, 3] },
     { id: 2, name: 'Project Discussion', participants: [1, 3] },
@@ -30,7 +33,7 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      <TopBar />
+      <TopBar /> {/* Uses default title "Campus Connect" */}
       <div className="content">
         <div className="friends-section">
           <h2>Friends</h2>
@@ -58,14 +61,17 @@ const HomePage = () => {
   );
 };
 
+
 const ChatsList = ({ chats }) => (
   <ul className="chats-list">
     {chats.map((chat) => (
       <li key={chat.id} className="chat-item">
-        <span>{chat.name}</span>
-        <span className="participant-count">
-          ({chat.participants.length} members)
-        </span>
+        <Link to="/" className="chat-link">
+          <span>{chat.name}</span>
+          <span className="participant-count">
+            ({chat.participants.length} members)
+          </span>
+        </Link>
       </li>
     ))}
   </ul>
@@ -74,7 +80,7 @@ const ChatsList = ({ chats }) => (
 const CreateChatModal = ({ friends, onCreate, onClose }) => {
   const [chatName, setChatName] = useState('');
   const [selectedFriends, setSelectedFriends] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); // State for error message
 
   const handleToggleFriend = (friendId) => {
     setSelectedFriends((prev) =>
