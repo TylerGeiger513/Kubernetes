@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaPlus, FaCheckSquare, FaRegSquare } from 'react-icons/fa';
-import TopBar from './TopBar'; // Import the reusable TopBar
-import FriendsList from './FriendsList'
+import TopBar from '../components/TopBar'; // Import the reusable TopBar
+import FriendsList from '../components/FriendsList'
 import './HomePage.css';
 
 const HomePage = () => {
