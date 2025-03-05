@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaVolumeUp, FaTimes } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
 import { HiPaperAirplane } from 'react-icons/hi2';
-import TopBar from '../components/TopBar'; 
-import './ServerUI.css';
+import TopBar from './TopBar';
+import './ChatsUI.css';
+
+// Sample chat data
+const chatsData = [
+  { id: 1, name: 'Alice', participants: ['You', 'Alice'] },
+  { id: 2, name: 'Bob', participants: ['You', 'Bob'] },
+  { id: 3, name: 'Group Chat', participants: ['You', 'Alice', 'Bob', 'Charlie'] },
+];
 
 const ServerUI = () => {
-  const [selectedChannel, setSelectedChannel] = useState('# general');
+  const [selectedChat, setSelectedChat] = useState(chatsData[0]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
@@ -13,8 +20,9 @@ const ServerUI = () => {
     <div className="app-container">
       <TopBar />
       <MainContainer
-        selectedChannel={selectedChannel}
-        setSelectedChannel={setSelectedChannel}
+        chats={chatsData}
+        selectedChat={selectedChat}
+        setSelectedChat={setSelectedChat}
         setSelectedUser={setSelectedUser}
         setIsPopupOpen={setIsPopupOpen}
       />
@@ -28,53 +36,50 @@ const ServerUI = () => {
   );
 };
 
-const MainContainer = ({ selectedChannel, setSelectedChannel, setSelectedUser, setIsPopupOpen }) => (
+
+/** MainContainer Component */
+const MainContainer = ({ chats, selectedChat, setSelectedChat, setSelectedUser, setIsPopupOpen }) => (
   <div className="main-container">
     <LeftSidebar
-      selectedChannel={selectedChannel}
-      setSelectedChannel={setSelectedChannel}
+      chats={chats}
+      selectedChat={selectedChat}
+      setSelectedChat={setSelectedChat}
     />
-    <CentralArea selectedChannel={selectedChannel} />
+    <CentralArea selectedChat={selectedChat} />
     <RightSidebar
+      participants={selectedChat.participants}
       setSelectedUser={setSelectedUser}
       setIsPopupOpen={setIsPopupOpen}
     />
   </div>
 );
 
-const LeftSidebar = ({ selectedChannel, setSelectedChannel }) => (
+/** LeftSidebar Component */
+const LeftSidebar = ({ chats, selectedChat, setSelectedChat }) => (
   <div className="left-sidebar">
-    <div className="server-header">WCUPA</div>
-
-    <div className="channel-header">TEXT CHANNELS</div>
+    <div className="channel-header">CHATS</div>
     <ul className="channel-list">
-      {['# general', '# stuff', '# other'].map((channel) => (
+      {chats.map((chat) => (
         <li
-          key={channel}
-          className={`channel ${selectedChannel === channel ? 'selected' : ''}`}
-          onClick={() => setSelectedChannel(channel)}
+          key={chat.id}
+          className={`channel ${selectedChat.id === chat.id ? 'selected' : ''}`}
+          onClick={() => setSelectedChat(chat)}
         >
-          {channel}
+          {chat.name}
         </li>
       ))}
-    </ul>
-
-    <div className="channel-header">VOICE CHANNELS</div>
-    <ul className="channel-list">
-      <li className="channel">
-        <FaVolumeUp style={{ marginRight: 8 }} /> General
-      </li>
     </ul>
   </div>
 );
 
-const CentralArea = ({ selectedChannel }) => {
+/** CentralArea Component */
+const CentralArea = ({ selectedChat }) => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -93,12 +98,12 @@ const CentralArea = ({ selectedChannel }) => {
         year: '2-digit',
         hour: 'numeric',
         minute: '2-digit',
-        hour12: true
+        hour12: true,
       }),
       id: Date.now(),
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     setInputText('');
   };
 
@@ -106,11 +111,11 @@ const CentralArea = ({ selectedChannel }) => {
     <div className="central-area">
       <div className="chat-messages">
         <header>
-          <h1 className="header-title">{selectedChannel}</h1>
-          <p className="header-subtitle">This is the beginning of this server.</p>
-          <p className="header-timestamp">February 3, 2025</p>
+          <h1 className="header-title">{selectedChat.name}</h1>
+          <p className="header-subtitle">
+            This is the beginning of your conversation with {selectedChat.name}.
+          </p>
         </header>
-
         {messages.map((message, index) => {
           const prevMessage = messages[index - 1];
           const showUserInfo = !prevMessage || prevMessage.user !== message.user;
@@ -140,17 +145,16 @@ const CentralArea = ({ selectedChannel }) => {
         })}
         <div ref={messagesEndRef} />
       </div>
-
       <div className="chat-input-container">
         <input
           type="text"
-          placeholder={`Message ${selectedChannel}`}
+          placeholder={`Message ${selectedChat.name}`}
           className="chat-input"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault(); // Prevent new line
+              e.preventDefault();
               handleSend();
             }
           }}
@@ -163,15 +167,15 @@ const CentralArea = ({ selectedChannel }) => {
   );
 };
 
-const RightSidebar = ({ setSelectedUser, setIsPopupOpen }) => {
-  const onlineUsers = ['user1', 'user2'];
-  const offlineUsers = ['user3', 'user4', 'user5', 'user6'];
+/** RightSidebar Component */
+const RightSidebar = ({ participants, setSelectedUser, setIsPopupOpen }) => {
+  const onlineUsers = participants.filter((user) => user !== 'You');
 
   return (
     <div className="right-sidebar">
-      <h3>ONLINE — {onlineUsers.length}</h3>
+      <h3>PARTICIPANTS — {onlineUsers.length}</h3>
       <div className="user-list">
-        {onlineUsers.map(name => (
+        {onlineUsers.map((name) => (
           <User
             key={name}
             name={name}
@@ -183,25 +187,11 @@ const RightSidebar = ({ setSelectedUser, setIsPopupOpen }) => {
           />
         ))}
       </div>
-
-      <h3>OFFLINE — {offlineUsers.length}</h3>
-      <div className="user-list">
-        {offlineUsers.map(name => (
-          <User
-            key={name}
-            name={name}
-            status="offline"
-            onClick={() => {
-              setSelectedUser({ name, status: 'offline' });
-              setIsPopupOpen(true);
-            }}
-          />
-        ))}
-      </div>
     </div>
   );
 };
 
+/** User Component */
 const User = ({ name, status, onClick }) => (
   <div className="user" onClick={onClick} style={{ cursor: 'pointer' }}>
     <div className={`status-dot ${status}`} />
@@ -210,6 +200,7 @@ const User = ({ name, status, onClick }) => (
   </div>
 );
 
+/** UserProfilePopup Component */
 const UserProfilePopup = ({ user, onClose }) => (
   <div className="popup-overlay" onClick={onClose}>
     <div className="popup-content" onClick={(e) => e.stopPropagation()}>
