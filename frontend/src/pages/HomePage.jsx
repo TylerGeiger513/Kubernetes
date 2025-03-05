@@ -96,62 +96,73 @@ const ChatsList = ({ chats }) => (
 );
 
 const CreateChatModal = ({ friends, onCreate, onClose }) => {
-    const [chatName, setChatName] = useState('');
-    const [selectedFriends, setSelectedFriends] = useState([]);
-  
-    const handleToggleFriend = (friendId) => {
-      setSelectedFriends((prev) =>
-        prev.includes(friendId)
-          ? prev.filter((id) => id !== friendId)
-          : [...prev, friendId]
-      );
-    };
-  
-    const handleSubmit = () => {
-      if (chatName.trim() && selectedFriends.length > 0) {
-        onCreate(selectedFriends, chatName);
-      }
-    };
-  
-    return (
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <h3>Create New Chat</h3>
-          <input
-            className="modal-textbox"
-            type="text"
-            placeholder="Chat Name"
-            value={chatName}
-            onChange={(e) => setChatName(e.target.value)}
-          />
-          <div className="friends-selection">
-            {friends.map((friend) => (
-              <label key={friend.id} className="friend-selection-item">
-                <div className="friend-info">
-                  <div className="avatar">{friend.name[0]}</div>
-                  <span className="friend-name">{friend.name}</span>
-                </div>
-                {selectedFriends.includes(friend.id) ? (
-                  <FaCheckSquare className="checkbox-icon checked" />
-                ) : (
-                  <FaRegSquare className="checkbox-icon" />
-                )}
-                <input
-                  type="checkbox"
-                  checked={selectedFriends.includes(friend.id)}
-                  onChange={() => handleToggleFriend(friend.id)}
-                  className="hidden-checkbox"
-                />
-              </label>
-            ))}
-          </div>
-          <div className="modal-buttons">
-            <button onClick={handleSubmit}>Create</button>
-            <button onClick={onClose}>Cancel</button>
-          </div>
-        </div>
-      </div>
+  const [chatName, setChatName] = useState('');
+  const [selectedFriends, setSelectedFriends] = useState([]);
+  const [error, setError] = useState(''); // State for error message
+
+  const handleToggleFriend = (friendId) => {
+    setSelectedFriends((prev) =>
+      prev.includes(friendId)
+        ? prev.filter((id) => id !== friendId)
+        : [...prev, friendId]
     );
   };
+
+  const handleSubmit = () => {
+    if (!chatName.trim()) {
+      setError('Chat name is required.'); // Display error if name is missing
+      return;
+    }
+    if (selectedFriends.length === 0) {
+      setError('Please select at least one friend.'); // Optional friend check
+      return;
+    }
+    onCreate(selectedFriends, chatName); // Proceed if valid
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <h3>Create New Chat</h3>
+        {error && <div className="error-message">{error}</div>} {/* Error display */}
+        <input
+          className="modal-textbox"
+          type="text"
+          placeholder="Chat Name"
+          value={chatName}
+          onChange={(e) => {
+            setChatName(e.target.value);
+            setError(''); // Clear error as user types
+          }}
+        />
+        <div className="friends-selection">
+          {friends.map((friend) => (
+            <label key={friend.id} className="friend-selection-item">
+              <div className="friend-info">
+                <div className="avatar">{friend.name[0]}</div>
+                <span className="friend-name">{friend.name}</span>
+              </div>
+              {selectedFriends.includes(friend.id) ? (
+                <FaCheckSquare className="checkbox-icon checked" />
+              ) : (
+                <FaRegSquare className="checkbox-icon" />
+              )}
+              <input
+                type="checkbox"
+                checked={selectedFriends.includes(friend.id)}
+                onChange={() => handleToggleFriend(friend.id)}
+                className="hidden-checkbox"
+              />
+            </label>
+          ))}
+        </div>
+        <div className="modal-buttons">
+          <button onClick={handleSubmit}>Create</button>
+          <button onClick={onClose}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default HomePage;
