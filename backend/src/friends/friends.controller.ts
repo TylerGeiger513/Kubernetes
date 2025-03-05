@@ -13,6 +13,30 @@ import { CurrentUser } from '../auth/current-user.decorator';
 export class FriendsController {
     constructor(private readonly friendsService: FriendsService) { }
 
+    @Post('friendsList')
+    async getFriendsList(@CurrentUser() currentUserId: string): Promise<any> {
+        const friends = await this.friendsService.getFriends(currentUserId);
+        return { friends };
+    }
+
+    @Post('getIncomingRequests')
+    async getFriendRequests(@CurrentUser() currentUserId: string): Promise<any> {
+        const requests = await this.friendsService.getIncomingFriendRequests(currentUserId);
+        return { requests };
+    }
+
+    @Post('getSentRequests')
+    async getSentRequests(@CurrentUser() currentUserId: string): Promise<any> {
+        const requests = await this.friendsService.getSentFriendRequests(currentUserId);
+        return { requests };
+    }
+
+    @Post('getBlockedUsers')
+    async getBlockedUsers(@CurrentUser() currentUserId: string): Promise<any> {
+        const blockedUsers = await this.friendsService.getBlockedUsers(currentUserId);
+        return { blockedUsers };
+    }
+
     @Post('request')
     async sendFriendRequest(
         @CurrentUser() currentUserId: string,

@@ -1,12 +1,16 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { MessageRepository } from './message.repository';
 import { IMessage } from './message.schema';
+import { EventEmitter2 } from '@nestjs/event-emitter'; // <-- Import EventEmitter2
 
 @Injectable()
 export class MessageService {
     private readonly logger = new Logger(MessageService.name);
-
-    constructor(private readonly messageRepository: MessageRepository) { }
+ 
+    constructor(
+        private readonly messageRepository: MessageRepository,
+        private readonly eventEmitter: EventEmitter2, // <-- Inject EventEmitter2
+    ) { }
 
     /**
      * Retrieves messages for a given channel. Optionally, a limit can be provided.
@@ -22,8 +26,10 @@ export class MessageService {
      * @param dto - Object containing channelId, senderId, and content.
      */
     async sendMessage(dto: { channelId: string; senderId: string; content: string }): Promise<IMessage> {
-        // Validate that senderId is allowed can be done in a higher layer.
-        return this.messageRepository.sendMessage(dto);
+        const message = await this.messageRepository.sendMessage(dto);
+        // Emit the event so that other parts (like the gateway) can broadcast it.
+        this.eventEmitter.emit('message.sent', message);
+        return message;
     }
 
     /**

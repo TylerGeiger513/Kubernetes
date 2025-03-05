@@ -20,9 +20,11 @@ export class ChannelsService {
      */
     async getOrCreateDMChannel(userId1: string, userId2: string): Promise<IChannel> {
         const existing = await this.channelsRepository.findDMChannel(userId1, userId2);
+        this.logger.log(`Found existing DM channel: ${existing}`);
         if (existing) {
             return existing;
         }
+        this.logger.log(`Creating new DM channel between ${userId1} and ${userId2}.`);
         return this.channelsRepository.createChannel({
             type: 'DM',
             participants: [userId1, userId2],

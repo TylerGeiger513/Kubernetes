@@ -5,12 +5,13 @@ import {
     OnGatewayDisconnect,
     SubscribeMessage,
 } from '@nestjs/websockets';
+import { OnModuleInit } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import * as cookie from 'cookie';
-import * as signature from 'cookie-signature';
 import { ConfigService } from '../config/config.service';
 import { SessionService } from '../session/session.service';
+import { EventEmitter2 } from '@nestjs/event-emitter'; // <-- Import EventEmitter2
 
 /**
  * @class ChannelsGateway
@@ -19,12 +20,13 @@ import { SessionService } from '../session/session.service';
  */
 @WebSocketGateway({
     namespace: '/channels',
+    path: '/channels/socket.io',
     cors: {
         origin: '*', // For production, set this to trusted origins.
         credentials: true,
     },
 })
-export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit {
     @WebSocketServer()
     server: Server;
 
@@ -34,7 +36,19 @@ export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect
     constructor(
         private readonly configService: ConfigService,
         private readonly sessionService: SessionService,
-    ) { }
+        private readonly eventEmitter: EventEmitter2, // <-- Inject EventEmitter2
+    ) {}
+
+    onModuleInit() {
+        // Subscribe to the message.sent event
+        this.eventEmitter.on('message.sent', (message) => {
+            if (message && message.channelId) {
+                // Broadcast the message to the channel room.
+                this.server.to(message.channelId).emit('messageReceived', message);
+                this.logger.log(`Emitted message to channel ${message.channelId}`);
+            }
+        });
+    }
 
     async handleConnection(client: Socket) {
         try {
@@ -45,18 +59,16 @@ export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect
                 client.disconnect();
                 return;
             }
-            const unsigned = signature.unsign(rawCookie, this.configService.sessionSecret);
-            if (!unsigned) {
-                this.logger.error('Invalid session signature. Disconnecting client.');
-                client.disconnect();
-                return;
-            }
-            const session = await this.sessionService.getSession(unsigned);
+            this.logger.log(`Client connected: rawCookie=${rawCookie}`);
+
+            // Retrieve the session directly using the raw cookie.
+            const session = await this.sessionService.getSessionFromRawCookie(rawCookie);
             if (!session || !session.userId) {
                 this.logger.error('Unauthenticated session. Disconnecting client.');
                 client.disconnect();
                 return;
             }
+
             // Store the client by userId.
             this.clients.set(session.userId, client);
             this.logger.log(`Client connected: userId=${session.userId}`);
@@ -90,29 +102,19 @@ export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect
     }
 
     /**
-     * Broadcasts an event to all clients in a given channel (room).
-     * @param channelId - The room identifier.
-     * @param event - The event name.
-     * @param payload - The payload to send.
-     */
-    sendChannelEvent(channelId: string, event: string, payload: any): void {
-        this.server.to(channelId).emit(event, payload);
-        this.logger.log(`Event "${event}" sent to channel ${channelId}: ${JSON.stringify(payload)}`);
-    }
-
-    /**
-     * Example message handler that echoes received messages.
-     * Clients should provide a payload including channelId, senderId, and content.
+     * (Optional) If you want to process incoming 'sendMessage' events via WebSocket,
+     * you can have this handler call MessageService, which will emit the event.
+     * Otherwise, you can rely on your HTTP flow to trigger MessageService.sendMessage().
      */
     @SubscribeMessage('sendMessage')
-    async handleSendMessage(client: Socket, payload: any): Promise<void> {
+    async handleSendMessage(client: Socket, payload: { channelId: string; senderId: string; content: string }): Promise<void> {
         const { channelId, senderId, content } = payload;
         if (!channelId || !senderId || !content) {
             client.emit('error', 'Missing required fields in message payload');
             return;
         }
-        // In a real implementation, you would validate that the sender is part of the channel.
-        this.server.to(channelId).emit('messageReceived', { senderId, content });
-        this.logger.log(`Message from ${senderId} broadcasted in channel ${channelId}: ${content}`);
+        // In this minimal modification we simply log the receipt.
+        // The actual broadcasting is triggered by the MessageService event emitter.
+        this.logger.log(`Received sendMessage from ${senderId} for channel ${channelId}`);
     }
 }

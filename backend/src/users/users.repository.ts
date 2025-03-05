@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { IUser, User, UserDocument } from './users.schema';
 
 /**
@@ -35,13 +35,14 @@ export class UsersRepository implements IUsersRepository {
      * @returns The created user as a plain object.
      */
     async createUser(email: string, username: string, hashedPassword: string, campus: string): Promise<IUser> {
-        this.logger.log(`Creating user: ${email}`);
         const createdUser = new this.userModel({ email, username, password: hashedPassword, campus });
         // Save and convert to plain object with lean.
         const savedUser = await createdUser.save();
         const plainUser = savedUser.toObject() as IUser;
         if (plainUser._id) {
             plainUser._id = plainUser._id.toString();
+        } else {
+            throw new Error('User ID not found after save.');
         }
         return plainUser;
     }
@@ -57,26 +58,51 @@ export class UsersRepository implements IUsersRepository {
     }
 
     /**
-     * Finds a user by any identifier (id, email, or username).
-     * @param identifier - Object containing an id, email, or username.
-     * @returns The user as a plain object if found; otherwise, null.
-     */
+   * Finds a user by one or more identifiers.
+   * If multiple identifiers are provided, the query matches if any are valid.
+   * @param identifier - An object containing id, email, or username.
+   * @returns The found user or null.
+   */
     async findByIdentifier(identifier: { id?: string; email?: string; username?: string }): Promise<IUser | null> {
-        const query: any = {};
-        if (identifier.id) query._id = identifier.id;
-        if (identifier.email) query.email = identifier.email;
-        if (identifier.username) query.username = identifier.username;
+        const orConditions: { _id?: string; email?: string; username?: string }[] = [];
 
-        this.logger.log(`Finding user by identifier: ${JSON.stringify(query)}`);
-        const user = await this.userModel.findOne(query).lean().exec();
+        if (identifier.id && Types.ObjectId.isValid(identifier.id)) {
+            orConditions.push({ _id: identifier.id });
+        }
+        if (identifier.email) {
+            orConditions.push({ email: identifier.email });
+        }
+        if (identifier.username) {
+            orConditions.push({ username: identifier.username });
+        }
+
+        if (orConditions.length === 0) {
+            this.logger.warn(`No valid identifier provided.`);
+            return null;
+        }
+
+        const query = { $or: orConditions };
+        this.logger.log(`Finding user with query: ${JSON.stringify(query)}`);
+
+        let user: any;
+        try {
+            user = await this.userModel.findOne(query).lean().exec();
+        } catch (error) {
+            this.logger.error(`Error finding user: ${error.message}`);
+            return null;
+        }
+
         if (user && user._id) {
             user._id = user._id.toString();
             this.logger.log(`User found: ${user.username}`);
-            return user ? { ...user, _id: user._id.toString() } : null;
+            return user;
         }
+
         this.logger.warn(`User not found for identifier: ${JSON.stringify(identifier)}`);
         return null;
     }
+
+
     /**
      * Updates a user with the given update object.
      * @param userId - ID of the user to update.

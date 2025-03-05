@@ -1,18 +1,23 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { ChannelsService } from './channels.service';
+import { Logger } from '@nestjs/common';
 
-/**
- * @class ChannelsGuard
- * @description Guards channel endpoints by ensuring that the authenticated user is a participant of the channel.
- */
+const bypassedEndpoints: RegExp[] = [/\/channel\/getDMChannel/];
+
 @Injectable()
 export class ChannelsGuard implements CanActivate {
-    constructor(private readonly channelsService: ChannelsService) { }
+    constructor(
+        private readonly channelsService: ChannelsService,
+        private readonly logger: Logger,
+    ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const userId = request.session?.userId;
         const channelId = request.params?.channelId || request.body?.channelId;
+        if (bypassedEndpoints.some(regex => regex.test(request.route.path)) && userId) {
+            return true;
+        }
 
         if (!userId || !channelId) {
             throw new ForbiddenException('Missing authentication or channel identifier.');

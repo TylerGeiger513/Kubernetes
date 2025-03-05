@@ -32,8 +32,6 @@ export class FriendsService {
 
     /**
      * Sends a friend request from the current user to a target user.
-     * @param currentUserId - ID of the sender.
-     * @param targetIdentifier - Identifier (id, email, or username) of the target.
      */
     async sendFriendRequest(currentUserId: string, targetIdentifier: string): Promise<void> {
         if (currentUserId === targetIdentifier) {
@@ -54,11 +52,11 @@ export class FriendsService {
 
         // Update target user's friendRequests.
         await this.usersRepository.updateUser(targetUser._id as string, {
-            friendRequests: [...(targetUser.friendRequests || [] as string[]), currentUserId],
+            friendRequests: [...(targetUser.friendRequests || []), currentUserId],
         });
         // Update current user's sentFriendRequests.
         await this.usersRepository.updateUser(currentUserId, {
-            sentFriendRequests: [...(currentUser.sentFriendRequests || [] as string[]), targetUser._id as string],
+            sentFriendRequests: [...(currentUser.sentFriendRequests || []), targetUser._id as string],
         });
 
         // Notify the target user in real time.
@@ -67,8 +65,6 @@ export class FriendsService {
 
     /**
      * Accepts a friend request.
-     * @param currentUserId - ID of the user accepting the request.
-     * @param requesterIdentifier - Identifier of the user who sent the request.
      */
     async acceptFriendRequest(currentUserId: string, requesterIdentifier: string): Promise<void> {
         const currentUser = await this.getUser(currentUserId);
@@ -79,7 +75,7 @@ export class FriendsService {
         }
 
         const updatedCurrentRequests = currentUser.friendRequests.filter(id => id !== requesterUser._id);
-        const updatedRequesterSent = requesterUser.sentFriendRequests?.filter(id => id !== currentUserId) || [];
+        const updatedRequesterSent = (requesterUser.sentFriendRequests || []).filter(id => id !== currentUserId);
         const updatedCurrentFriends = [...(currentUser.friends || []), requesterUser._id as string];
         const updatedRequesterFriends = [...(requesterUser.friends || []), currentUserId];
 
@@ -98,22 +94,20 @@ export class FriendsService {
 
     /**
      * Denies a friend request.
-     * @param currentUserId - ID of the user denying the request.
-     * @param requesterIdentifier - Identifier of the user who sent the request.
      */
     async denyFriendRequest(currentUserId: string, requesterIdentifier: string): Promise<void> {
         const currentUser = await this.getUser(currentUserId);
-        if (!currentUser.friendRequests || !currentUser.friendRequests.includes(requesterIdentifier)) {
+        const requesterUser = await this.getUser(requesterIdentifier);
+
+        if (!currentUser.friendRequests?.includes(requesterUser._id as string)) {
             throw new BadRequestException('No friend request from this user.');
         }
-        const updatedRequests = currentUser.friendRequests.filter(id => id !== requesterIdentifier);
+        const updatedRequests = currentUser.friendRequests.filter(id => id !== requesterUser._id);
         await this.usersRepository.updateUser(currentUserId, { friendRequests: updatedRequests });
     }
 
     /**
      * Removes a friend.
-     * @param currentUserId - ID of the current user.
-     * @param friendIdentifier - Identifier of the friend to remove.
      */
     async removeFriend(currentUserId: string, friendIdentifier: string): Promise<void> {
         const currentUser = await this.getUser(currentUserId);
@@ -129,22 +123,18 @@ export class FriendsService {
 
     /**
      * Cancels a sent friend request.
-     * @param currentUserId - ID of the sender.
-     * @param targetIdentifier - Identifier of the target user.
      */
     async cancelFriendRequest(currentUserId: string, targetIdentifier: string): Promise<void> {
         const currentUser = await this.getUser(currentUserId);
         const targetUser = await this.getUser(targetIdentifier);
-        const updatedSent = currentUser.sentFriendRequests?.filter(id => id !== targetUser._id) || [];
-        const updatedTargetRequests = targetUser.friendRequests?.filter(id => id !== currentUserId) || [];
+        const updatedSent = (currentUser.sentFriendRequests || []).filter(id => id !== targetUser._id);
+        const updatedTargetRequests = (targetUser.friendRequests || []).filter(id => id !== currentUserId);
         await this.usersRepository.updateUser(currentUserId, { sentFriendRequests: updatedSent });
         await this.usersRepository.updateUser(targetUser._id as string, { friendRequests: updatedTargetRequests });
     }
 
     /**
      * Blocks a user.
-     * @param currentUserId - ID of the current user.
-     * @param targetIdentifier - Identifier of the user to block.
      */
     async blockUser(currentUserId: string, targetIdentifier: string): Promise<void> {
         const currentUser = await this.getUser(currentUserId);
@@ -152,6 +142,7 @@ export class FriendsService {
         if (currentUser.blockedUsers?.includes(targetUser._id as string)) {
             throw new BadRequestException('User is already blocked.');
         }
+        // Remove from friends and any pending requests.
         const updatedFriends = (currentUser.friends || []).filter(id => id !== targetUser._id);
         const updatedFriendRequests = (currentUser.friendRequests || []).filter(id => id !== targetUser._id);
         const updatedSentRequests = (currentUser.sentFriendRequests || []).filter(id => id !== targetUser._id);
@@ -159,21 +150,73 @@ export class FriendsService {
             friends: updatedFriends,
             friendRequests: updatedFriendRequests,
             sentFriendRequests: updatedSentRequests,
-            blockedUsers: [...(currentUser.blockedUsers || [] as string[]), targetUser._id as string],
+            blockedUsers: [...(currentUser.blockedUsers || []), targetUser._id as string],
         });
     }
 
     /**
      * Unblocks a user.
-     * @param currentUserId - ID of the current user.
-     * @param targetIdentifier - Identifier of the user to unblock.
      */
     async unblockUser(currentUserId: string, targetIdentifier: string): Promise<void> {
         const currentUser = await this.getUser(currentUserId);
-        if (!currentUser.blockedUsers || !currentUser.blockedUsers.includes(targetIdentifier)) {
+        // Ensure we compare against the actual _id stored in blockedUsers.
+        const targetUser = await this.getUser(targetIdentifier);
+        if (!currentUser.blockedUsers || !currentUser.blockedUsers.includes(targetUser._id as string)) {
             throw new BadRequestException('User is not blocked.');
         }
-        const updatedBlocked = currentUser.blockedUsers.filter(id => id !== targetIdentifier);
+        const updatedBlocked = currentUser.blockedUsers.filter(id => id !== targetUser._id);
         await this.usersRepository.updateUser(currentUserId, { blockedUsers: updatedBlocked });
+    }
+
+    /**
+     * Retrieves a user's friends.
+     */
+    async getFriends(userId: string): Promise<{ id: string, username: string }[]> {
+        const user = await this.getUser(userId);
+        const friendIds = user.friends || [];
+        const friends = await Promise.all(friendIds.map(async (friendId) => {
+            const friend = await this.getUser(friendId);
+            return { id: friend._id as string, username: friend.username };
+        }));
+        return friends;
+    }
+
+    /**
+     * Retrieves a user's incoming friend requests.
+     */
+    async getIncomingFriendRequests(userId: string): Promise<{ id: string, username: string }[]> {
+        const user = await this.getUser(userId);
+        const requestIds = user.friendRequests || [];
+        const requests = await Promise.all(requestIds.map(async (id) => {
+            const requester = await this.getUser(id);
+            return { id: requester._id as string, username: requester.username };
+        }));
+        return requests;
+    }
+
+    /**
+     * Retrieves a user's sent friend requests.
+     */
+    async getSentFriendRequests(userId: string): Promise<{ id: string, username: string }[]> {
+        const user = await this.getUser(userId);
+        const sentIds = user.sentFriendRequests || [];
+        const sentRequests = await Promise.all(sentIds.map(async (id) => {
+            const target = await this.getUser(id);
+            return { id: target._id as string, username: target.username };
+        }));
+        return sentRequests;
+    }
+
+    /**
+     * Retrieves a user's blocked users.
+     */
+    async getBlockedUsers(userId: string): Promise<{ id: string, username: string }[]> {
+        const user = await this.getUser(userId);
+        const blockedIds = user.blockedUsers || [];
+        const blockedUsers = await Promise.all(blockedIds.map(async (id) => {
+            const blocked = await this.getUser(id);
+            return { id: blocked._id as string, username: blocked.username };
+        }));
+        return blockedUsers;
     }
 }

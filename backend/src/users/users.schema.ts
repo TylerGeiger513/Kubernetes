@@ -50,6 +50,7 @@ export class User implements IUser {
 
     @Prop({ type: [String], default: [] })
     blockedUsers!: string[];
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

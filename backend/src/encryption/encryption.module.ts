@@ -6,6 +6,7 @@
 import { Module } from '@nestjs/common';
 import { EncryptionService } from './encryption.service';
 import { ConfigModule } from '../config/config.module';
+import { ChannelsGateway } from 'src/channels/channels.gateway';
 
 @Module({
   imports: [ConfigModule],

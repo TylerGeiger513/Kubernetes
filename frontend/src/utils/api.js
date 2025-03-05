@@ -8,6 +8,8 @@ export const api = axios.create({
 });
 
 export const createSocket = () => {
-  // Connect to the /channels namespace.
-  return io('/channels', { withCredentials: true });
+  return io('/channels', { 
+    path: '/channels/socket.io', 
+    withCredentials: true 
+  });
 };

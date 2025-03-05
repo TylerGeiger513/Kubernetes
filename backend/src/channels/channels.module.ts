@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger} from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Channel, ChannelSchema } from './channel.schema';
 import { Message, MessageSchema } from './message.schema';
@@ -11,6 +11,7 @@ import { ChannelsController } from './channels.controller';
 import { ChannelsGuard } from './channels.guard';
 import { ConfigModule } from '../config/config.module';
 import { SessionModule } from '../session/session.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SessionModule } from '../session/session.module';
     SessionModule,
     MongooseModule.forFeature([{ name: Channel.name, schema: ChannelSchema }]),
     MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
+    EventEmitterModule.forRoot(),
   ],
   providers: [
     ChannelsRepository,
@@ -26,6 +28,7 @@ import { SessionModule } from '../session/session.module';
     MessageService,
     ChannelsGateway,
     ChannelsGuard,
+    Logger,
   ],
   controllers: [ChannelsController],
   exports: [

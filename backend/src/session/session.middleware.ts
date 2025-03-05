@@ -1,8 +1,8 @@
 /**
  * @file session.middleware.ts
- * @description This middleware intercepts incoming HTTP requests, extracts the session token (cookie or JWT),
- * decrypts it using the EncryptionService, and attaches the resulting session data to the request object.
- * This abstraction ensures that session management is pluggable and can easily switch between mechanisms.
+ * @description Intercepts incoming HTTP requests, decrypts session data from the cookie,
+ * and attaches the resulting session to the request object. This implementation uses Redis as a store,
+ * with encryption applied to session data for additional security.
  */
 
 import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
@@ -44,15 +44,25 @@ export class SessionMiddleware implements NestMiddleware {
     const store = new RedisStore({
       client: redisClient,
       prefix: 'session:',
-      ttl: 86400, // 1 day TTL
+      ttl: 86400, // 1 day in seconds
       serializer: {
         parse: (data: string) => {
-          const decrypted = this.encryptionService.decrypt(data);
-          return JSON.parse(decrypted);
+          try {
+            const decrypted = this.encryptionService.decrypt(data);
+            return JSON.parse(decrypted);
+          } catch (err) {
+            this.logger.error('Failed to parse session data:', err);
+            return {};
+          }
         },
         stringify: (data: any) => {
-          const stringified = JSON.stringify(data);
-          return this.encryptionService.encrypt(stringified);
+          try {
+            const stringified = JSON.stringify(data);
+            return this.encryptionService.encrypt(stringified);
+          } catch (err) {
+            this.logger.error('Failed to stringify session data:', err);
+            return '';
+          }
         },
       },
     });
@@ -66,24 +76,25 @@ export class SessionMiddleware implements NestMiddleware {
       cookie: {
         httpOnly: true,
         secure: this.configService.cookieSecure,
-        sameSite: 'strict',
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000, // 1 day in milliseconds
       },
     });
   }
 
   /**
    * Executes the session middleware to attach the session to the request.
+   * Ensures that _parsedUrl exists to avoid errors with certain Express versions.
    * @param req - Express Request object.
    * @param res - Express Response object.
-   * @param next - Function to call the next middleware.
+   * @param next - Next middleware function.
    */
   use(req: Request, res: Response, next: NextFunction): void {
     // Ensure req.url is defined
     if (!req.url) {
       req.url = '/';
     }
-    // Safely assign _parsedUrl if not already defined
+    // Safely assign _parsedUrl if not already defined (needed by some Express setups)
     if (!(req as any)._parsedUrl) {
       (req as any)._parsedUrl = { pathname: req.url };
     }

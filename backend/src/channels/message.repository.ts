@@ -13,12 +13,13 @@ export class MessageRepository {
      * Retrieves all messages in a channel, sorted by creation time.
      */
     async getMessages(channelId: string): Promise<IMessage[]> {
-        // if the channel does not exist in the database, throw an error
-        const channel = await this.messageModel.findOne({ channelId }).exec();
-        if (!channel || !channel._id) {
+        // Check if at least one message exists for the channel (or optionally check for channel existence in another way)
+        const messageExists = await this.messageModel.exists({ channelId });
+        if (!messageExists) {
             throw new ForbiddenException('Channel not found.');
         }
-        const messages = await this.messageModel.find({ channelId }).sort({ createdAt: 1 }).exec();
+        // Retrieve all messages, sort them by createdAt, and lean() them to get plain JS objects.
+        const messages = await this.messageModel.find({ channelId }).sort({ createdAt: 1 }).lean().exec();
         return messages.map(m => ({ ...m, _id: m._id.toString() }));
     }
 
