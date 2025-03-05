@@ -1,0 +1,255 @@
+.home-page {
+    background-color: #23272A;
+    color: #DCDDDE;
+    min-height: 100vh;
+  }
+  
+  .content {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+  }
+  
+  .friends-section,
+  .chats-section {
+    background-color: #2C2F33;
+    padding: 20px;
+    border-radius: 5px;
+    flex: 1;
+  }
+  
+  .friends-list,
+  .chats-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .friend-item,
+  .chat-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #3A3F45;
+    border-radius: 5px;
+  }
+  
+  .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #7289DA;
+    text-align: center;
+    line-height: 30px;
+    margin-right: 10px;
+  }
+  
+  .participant-count {
+    margin-left: auto;
+    color: #72767D;
+  }
+  
+  .create-chat-button {
+    background-color: #7289DA;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+  }
+  
+  .create-chat-button:hover {
+    background-color: #677bc4;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  
+  .modal-content {
+    background-color: #2C2F33;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+  }
+  
+  .modal-content h3 {
+    margin-top: 0;
+  }
+  
+  .friends-selection {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #4F545C #2C2F33;
+  }
+  
+  .friends-selection label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .avatar.profile-fallback {
+    background-color: #7289DA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+  }
+
+  .friend-selection-item input[type="checkbox"] {
+    display: none; /* Hide default checkbox */
+  }
+  
+  .modal-content input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #23272A;
+    border: 1px solid #1A1D21;
+    color: #DCDDDE;
+    border-radius: 5px;
+  }
+  
+  .modal-content button {
+    padding: 10px 15px;
+    margin-right: 10px;
+    background-color: #7289DA;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .modal-content button:hover {
+    background-color: #677bc4;
+  }
+  
+  @media (max-width: 768px) {
+    .content {
+      flex-direction: column;
+    }
+  }
+  
+  /* Ensure TopBar styles are consistent with ServerUI */
+  .top-bar {
+    background-color: #2C2F33;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .server-info {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .icons {
+    display: flex;
+    align-items: center;
+  }
+  
+  .icon {
+    font-size: 20px;
+    cursor: pointer;
+    color: #DCDDDE;
+  }
+
+  .modal-textbox {
+    box-sizing: border-box;
+  }
+
+  .friend-selection-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #3A3F45;
+    border-radius: 5px;
+    margin-bottom: 8px;
+    transition: background-color 0.2s;
+    gap: 12px;
+  }
+  
+  .friend-selection-item:hover {
+    background-color: #4A4F55;
+  }
+  
+  .friend-info {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+  }
+  
+  .friend-profile-pic,
+  .avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .friend-profile-pic {
+    object-fit: cover;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+  }
+  
+  .avatar {
+    background-color: #7289DA;
+    text-align: center;
+    line-height: 30px;
+  }
+  
+  .friend-name {
+    color: #DCDDDE;
+    font-weight: 500;
+  }
+  
+  .friends-selection input[type="checkbox"] {
+    margin-left: auto;
+  }
+
+  .friends-selection::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .friends-selection::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .friends-selection::-webkit-scrollbar-thumb {
+    background: #4F545C;
+    border-radius: 4px;
+  }
+
+  .checkbox-icon {
+    color: #DCDDDE;
+    font-size: 1.2rem;
+    margin-left: auto;
+    transition: all 0.2s ease;
+  }
+  
+  .checkbox-icon.checked {
+    color: #7289DA;
+  }
+
+  
