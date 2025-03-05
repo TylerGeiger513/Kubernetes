@@ -1,166 +1,179 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { UserDocument } from '../users/users.schema';
+import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
+import { UsersRepository } from '../users/users.repository';
+import { IUser } from '../users/users.schema';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class FriendsService {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly eventEmitter: EventEmitter2,
-  ) {}
+    private readonly logger = new Logger(FriendsService.name);
 
-  /**
-   * Send a friend request from the current user to a target user.
-   */
-  async sendFriendRequest(currentUserId: string, friendId: string): Promise<void> {
-    if (currentUserId === friendId) {
-      throw new BadRequestException("Cannot send a friend request to yourself.");
-    }
+    constructor(
+        private readonly usersRepository: UsersRepository,
+        private readonly notificationsService: NotificationsService,
+    ) { }
 
-    const currentUser = await this.usersService.findById(currentUserId);
-    const friend = await this.usersService.findById(friendId);
-    if (!friend) {
-      throw new NotFoundException("Friend user not found.");
-    }
-    if (!currentUser) {
-      throw new NotFoundException("Current user not found.");
-    }
-    if (currentUser.friends.includes(friendId)) {
-      throw new BadRequestException("You are already friends.");
-    }
-    if (friend.friendRequests.includes(currentUserId)) {
-      throw new BadRequestException("Friend request already sent.");
-    }
-    if (friend.blockedUsers.includes(currentUserId) || currentUser.blockedUsers.includes(friendId)) {
-      throw new BadRequestException("Cannot send friend request due to block status.");
+    /**
+     * Retrieves a user by any identifier.
+     * @param identifier - A string that can be an id, email, or username.
+     * @returns The user if found.
+     * @throws NotFoundException if no user is found.
+     */
+    private async getUser(identifier: string): Promise<IUser> {
+        const user = await this.usersRepository.findByIdentifier({
+            id: identifier,
+            email: identifier,
+            username: identifier,
+        });
+        if (!user) {
+            throw new NotFoundException(`User not found for identifier: ${identifier}`);
+        }
+        return user;
     }
 
-    // Add the friend request to the target user's friendRequests array
-    friend.friendRequests.push(currentUserId);
-    await friend.save();
+    /**
+     * Sends a friend request from the current user to a target user.
+     * @param currentUserId - ID of the sender.
+     * @param targetIdentifier - Identifier (id, email, or username) of the target.
+     */
+    async sendFriendRequest(currentUserId: string, targetIdentifier: string): Promise<void> {
+        if (currentUserId === targetIdentifier) {
+            throw new BadRequestException('Cannot send a friend request to yourself.');
+        }
 
-    // Emit an event so that the Notifications module can notify the target user in real time.
-    this.eventEmitter.emit('friend.request.sent', { from: currentUserId, to: friendId });
-  }
+        const targetUser = await this.getUser(targetIdentifier);
+        const currentUser = await this.getUser(currentUserId);
 
-  /**
-   * Accept a friend request.
-   */
-  async acceptFriendRequest(currentUserId: string, friendId: string): Promise<void> {
-    const currentUser = await this.usersService.findById(currentUserId);
-    const friend = await this.usersService.findById(friendId);
-    if (!friend) {
-      throw new NotFoundException("Friend user not found.");
-    }
-    if (!currentUser || !currentUser.friendRequests.includes(friendId)) {
-      throw new BadRequestException("No friend request from this user.");
-    }
+        // Check if they are already friends.
+        if (currentUser.friends?.includes(targetUser._id as string)) {
+            throw new BadRequestException('Already friends.');
+        }
+        // Check if request was already sent.
+        if (targetUser.friendRequests?.includes(currentUserId)) {
+            throw new BadRequestException('Friend request already sent.');
+        }
 
-    // Remove the friend request and add each other as friends
-    currentUser.friendRequests = currentUser.friendRequests.filter(id => id !== friendId);
-    currentUser.friends.push(friendId);
-    friend.friends.push(currentUserId);
-    await currentUser.save();
-    await friend.save();
-  }
+        // Update target user's friendRequests.
+        await this.usersRepository.updateUser(targetUser._id as string, {
+            friendRequests: [...(targetUser.friendRequests || [] as string[]), currentUserId],
+        });
+        // Update current user's sentFriendRequests.
+        await this.usersRepository.updateUser(currentUserId, {
+            sentFriendRequests: [...(currentUser.sentFriendRequests || [] as string[]), targetUser._id as string],
+        });
 
-  /**
-   * Reject a friend request.
-   */
-  async rejectFriendRequest(currentUserId: string, friendId: string): Promise<void> {
-    const currentUser = await this.usersService.findById(currentUserId);
-    if (!currentUser || !currentUser.friendRequests.includes(friendId)) {
-      throw new BadRequestException("No friend request from this user.");
+        // Notify the target user in real time.
+        this.notificationsService.notifyFriendRequest(targetUser._id as string, currentUserId);
     }
 
-    currentUser.friendRequests = currentUser.friendRequests.filter(id => id !== friendId);
-    await currentUser.save();
-  }
+    /**
+     * Accepts a friend request.
+     * @param currentUserId - ID of the user accepting the request.
+     * @param requesterIdentifier - Identifier of the user who sent the request.
+     */
+    async acceptFriendRequest(currentUserId: string, requesterIdentifier: string): Promise<void> {
+        const currentUser = await this.getUser(currentUserId);
+        const requesterUser = await this.getUser(requesterIdentifier);
 
-  /**
-   * Remove a friend.
-   */
-  async removeFriend(currentUserId: string, friendId: string): Promise<void> {
-    const currentUser = await this.usersService.findById(currentUserId);
-    const friend = await this.usersService.findById(friendId);
-    if (!friend) {
-      throw new NotFoundException("Friend user not found.");
-    }
-    if (!currentUser || !currentUser.friends.includes(friendId)) {
-      throw new BadRequestException("Not friends with this user.");
+        if (!currentUser.friendRequests?.includes(requesterUser._id as string)) {
+            throw new BadRequestException('No friend request from this user.');
+        }
+
+        const updatedCurrentRequests = currentUser.friendRequests.filter(id => id !== requesterUser._id);
+        const updatedRequesterSent = requesterUser.sentFriendRequests?.filter(id => id !== currentUserId) || [];
+        const updatedCurrentFriends = [...(currentUser.friends || []), requesterUser._id as string];
+        const updatedRequesterFriends = [...(requesterUser.friends || []), currentUserId];
+
+        await this.usersRepository.updateUser(currentUserId, {
+            friendRequests: updatedCurrentRequests,
+            friends: updatedCurrentFriends,
+        });
+        await this.usersRepository.updateUser(requesterUser._id as string, {
+            sentFriendRequests: updatedRequesterSent,
+            friends: updatedRequesterFriends,
+        });
+
+        // Notify the requester that their friend request has been accepted.
+        this.notificationsService.notifyFriendRequestAccepted(requesterUser._id as string, currentUserId);
     }
 
-    currentUser.friends = currentUser.friends.filter(id => id !== friendId);
-    friend.friends = friend.friends.filter(id => id !== currentUserId);
-    await currentUser.save();
-    await friend.save();
-  }
+    /**
+     * Denies a friend request.
+     * @param currentUserId - ID of the user denying the request.
+     * @param requesterIdentifier - Identifier of the user who sent the request.
+     */
+    async denyFriendRequest(currentUserId: string, requesterIdentifier: string): Promise<void> {
+        const currentUser = await this.getUser(currentUserId);
+        if (!currentUser.friendRequests || !currentUser.friendRequests.includes(requesterIdentifier)) {
+            throw new BadRequestException('No friend request from this user.');
+        }
+        const updatedRequests = currentUser.friendRequests.filter(id => id !== requesterIdentifier);
+        await this.usersRepository.updateUser(currentUserId, { friendRequests: updatedRequests });
+    }
 
-  /**
-   * Block a user.
-   */
-  async blockUser(currentUserId: string, targetId: string): Promise<void> {
-    if (currentUserId === targetId) {
-      throw new BadRequestException("Cannot block yourself.");
+    /**
+     * Removes a friend.
+     * @param currentUserId - ID of the current user.
+     * @param friendIdentifier - Identifier of the friend to remove.
+     */
+    async removeFriend(currentUserId: string, friendIdentifier: string): Promise<void> {
+        const currentUser = await this.getUser(currentUserId);
+        const friendUser = await this.getUser(friendIdentifier);
+        if (!currentUser.friends || !currentUser.friends.includes(friendUser._id as string)) {
+            throw new BadRequestException('Not friends with this user.');
+        }
+        const updatedCurrentFriends = currentUser.friends.filter(id => id !== friendUser._id);
+        const updatedFriendFriends = friendUser.friends ? friendUser.friends.filter(id => id !== currentUserId) : [];
+        await this.usersRepository.updateUser(currentUserId, { friends: updatedCurrentFriends });
+        await this.usersRepository.updateUser(friendUser._id as string, { friends: updatedFriendFriends });
     }
-    const currentUser = await this.usersService.findById(currentUserId);
-    const targetUser = await this.usersService.findById(targetId);
-    if (!targetUser) {
-      throw new NotFoundException("Target user not found.");
-    }
-    if (currentUser && currentUser.blockedUsers.includes(targetId)) {
-      throw new BadRequestException("User is already blocked.");
-    }
-    
-    // Remove any existing friend relationship or pending friend requests.
-    if (!currentUser) {
-      throw new BadRequestException("Current user not found.");
-    }
-    currentUser.friendRequests = currentUser.friendRequests.filter(id => id !== targetId);
-    currentUser.friends = currentUser.friends.filter(id => id !== targetId);
-    targetUser.friends = targetUser.friends.filter(id => id !== currentUserId);
-    
-    currentUser.blockedUsers.push(targetId);
-    await currentUser.save();
-    await targetUser.save();
-  }
 
-  /**
-   * Unblock a user.
-   */
-  async unblockUser(currentUserId: string, targetId: string): Promise<void> {
-    const currentUser = await this.usersService.findById(currentUserId);
-    if (!currentUser || !currentUser.blockedUsers.includes(targetId)) {
-      throw new BadRequestException("User is not blocked.");
+    /**
+     * Cancels a sent friend request.
+     * @param currentUserId - ID of the sender.
+     * @param targetIdentifier - Identifier of the target user.
+     */
+    async cancelFriendRequest(currentUserId: string, targetIdentifier: string): Promise<void> {
+        const currentUser = await this.getUser(currentUserId);
+        const targetUser = await this.getUser(targetIdentifier);
+        const updatedSent = currentUser.sentFriendRequests?.filter(id => id !== targetUser._id) || [];
+        const updatedTargetRequests = targetUser.friendRequests?.filter(id => id !== currentUserId) || [];
+        await this.usersRepository.updateUser(currentUserId, { sentFriendRequests: updatedSent });
+        await this.usersRepository.updateUser(targetUser._id as string, { friendRequests: updatedTargetRequests });
     }
-    currentUser.blockedUsers = currentUser.blockedUsers.filter(id => id !== targetId);
-    await currentUser.save();
-  }
 
-  /**
-   * Get the list of friends for the current user.
-   */
-  async getFriendsList(currentUserId: string): Promise<UserDocument[]> {
-    const currentUser = await this.usersService.findById(currentUserId);
-    if (!currentUser) {
-      throw new NotFoundException("Current user not found.");
+    /**
+     * Blocks a user.
+     * @param currentUserId - ID of the current user.
+     * @param targetIdentifier - Identifier of the user to block.
+     */
+    async blockUser(currentUserId: string, targetIdentifier: string): Promise<void> {
+        const currentUser = await this.getUser(currentUserId);
+        const targetUser = await this.getUser(targetIdentifier);
+        if (currentUser.blockedUsers?.includes(targetUser._id as string)) {
+            throw new BadRequestException('User is already blocked.');
+        }
+        const updatedFriends = (currentUser.friends || []).filter(id => id !== targetUser._id);
+        const updatedFriendRequests = (currentUser.friendRequests || []).filter(id => id !== targetUser._id);
+        const updatedSentRequests = (currentUser.sentFriendRequests || []).filter(id => id !== targetUser._id);
+        await this.usersRepository.updateUser(currentUserId, {
+            friends: updatedFriends,
+            friendRequests: updatedFriendRequests,
+            sentFriendRequests: updatedSentRequests,
+            blockedUsers: [...(currentUser.blockedUsers || [] as string[]), targetUser._id as string],
+        });
     }
-    const friendIds = currentUser.friends;
-    const friends = await Promise.all(friendIds.map(id => this.usersService.findById(id)));
-    return friends.filter(f => !!f) as UserDocument[];
-  }
 
-  /**
-   * Get incoming friend requests for the current user.
-   */
-  async getFriendRequests(currentUserId: string): Promise<UserDocument[]> {
-    const currentUser = await this.usersService.findById(currentUserId);
-    if (!currentUser) {
-      throw new NotFoundException("Current user not found.");
+    /**
+     * Unblocks a user.
+     * @param currentUserId - ID of the current user.
+     * @param targetIdentifier - Identifier of the user to unblock.
+     */
+    async unblockUser(currentUserId: string, targetIdentifier: string): Promise<void> {
+        const currentUser = await this.getUser(currentUserId);
+        if (!currentUser.blockedUsers || !currentUser.blockedUsers.includes(targetIdentifier)) {
+            throw new BadRequestException('User is not blocked.');
+        }
+        const updatedBlocked = currentUser.blockedUsers.filter(id => id !== targetIdentifier);
+        await this.usersRepository.updateUser(currentUserId, { blockedUsers: updatedBlocked });
     }
-    const requestIds = currentUser.friendRequests;
-    const requests = await Promise.all(requestIds.map(id => this.usersService.findById(id)));
-    return requests.filter(r => !!r) as UserDocument[];
-  }
 }

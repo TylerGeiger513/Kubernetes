@@ -1,11 +1,18 @@
-// src/auth/current-user.decorator.ts
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { CustomSession } from '../types/custom-session';
 
+/**
+ * @function CurrentUser
+ * @description Extracts the current user ID from the request session.
+ * This decorator should be applied to a controller method parameter.
+ * 
+ * Usage:
+ * 
+ * @Get('profile')
+ * getProfile(@CurrentUser() userId: string) { ... }
+ */
 export const CurrentUser = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext): string | undefined => {
+  (data: unknown, ctx: ExecutionContext): string | null => {
     const request = ctx.switchToHttp().getRequest();
-    const session = request.session as CustomSession;
-    return session?.userId;
+    return request.session ? request.session.userId || null : null;
   },
 );

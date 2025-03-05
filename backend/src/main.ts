@@ -1,35 +1,40 @@
+/**
+ * @file main.ts
+ * @description Application entry point. Bootstraps the NestJS application using the
+ * new modular architecture. Global settings such as API prefix and CORS are configured
+ * using values from the ConfigService.
+ */
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { LoggerMiddleware } from './common/middleware/logger.middleware';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from './config/config.service';
-import { createSessionMiddleware } from './config/session.config';
-import { Request, Response, NextFunction } from 'express';
-
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const logger = new Logger('Bootstrap');
 
-    // Global configuration service
-    const configService = app.get(ConfigService);
-    // Setup session middleware (Redis-backed, with secure serialization)
-    app.use(createSessionMiddleware(configService));
+  // Set global API prefix.
+  app.setGlobalPrefix(configService.apiPrefix);
 
-    // Global prefix for API routes
-    app.setGlobalPrefix(configService.apiPrefix);
+  // Apply global exception filter.
+  app.useGlobalFilters(new HttpExceptionFilter());
 
-    // Apply global middleware and filters
-    const loggerMiddleware = new LoggerMiddleware();
-    app.use((req: Request, res: Response, next: NextFunction) => loggerMiddleware.use(req, res, next));
-    app.useGlobalFilters(new HttpExceptionFilter());
+  // Enable CORS with secure configuration.
+  app.enableCors({
+    origin: configService.corsOrigin,
+    credentials: true,
+  });
 
-    // Enable CORS with secure options
-    app.enableCors({
-        origin: configService.corsOrigin,
-        credentials: true,
-    });
+  // Retrieve and apply global logger middleware.
+  app.use(new LoggerMiddleware().use);
 
-    await app.listen(configService.port);
-    console.log(`🚀 Server running on http://localhost:${configService.port}`);
+  // Start the server.
+  await app.listen(configService.port);
+  logger.log(`🚀 Server running on http://localhost:${configService.port}`);
 }
+
 bootstrap();

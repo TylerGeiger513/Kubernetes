@@ -1,54 +1,55 @@
-import { Controller, Post, Body, Session, UseGuards, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dtos/signup.dto';
 import { LoginDto } from './dtos/login.dto';
 import { AuthGuard } from './auth.guard';
-import { CustomSession } from '../types/custom-session';
+import { Request } from 'express';
 import { CurrentUser } from './current-user.decorator';
+import * as session from 'express-session';
+
+/**
+ * CustomRequest extends Express Request to include session.
+ */
+interface CustomRequest extends Request {
+  session: session.Session & { userId?: string };
+}
 
 @Controller('auth')
 export class AuthController {
-  private readonly logger = new Logger(AuthController.name);
-
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('signup')
-  async signup(@Body() signupDto: SignupDto) {
-    await this.authService.signup(signupDto);
-    return { message: 'Signup successful' };
+  async signup(@Body() dto: SignupDto): Promise<any> {
+    return this.authService.signup(dto);
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto, @Session() session: CustomSession) {
-    try {
-      const user = await this.authService.login(loginDto);
-      session.userId = user._id.toString();
-      // Ensure session is saved before responding
-      await new Promise<void>((resolve, reject) => {
-        session.save((err) => (err ? reject(err) : resolve()));
-      });
-      return { message: 'Login successful' };
-    } catch (error) {
-      this.logger.error('Error during login', error);
-      throw error;
+  async login(@Body() dto: LoginDto, @Req() req: CustomRequest): Promise<any> {
+    const user = await this.authService.login(dto);
+    if (!user || !user._id) {
+      throw new UnauthorizedException('Invalid credentials');
     }
+    // Assign authenticated user's ID to the session.
+    req.session.userId = user._id.toString();
+    // Save the session to ensure the cookie is set.
+    await new Promise<void>((resolve, reject) => {
+      req.session.save((err) => (err ? reject(err) : resolve()));
+    });
+    return { message: 'Login successful', user };
   }
 
   @Post('logout')
-  async logout(@Session() session: CustomSession) {
-    return new Promise((resolve, reject) => {
-      session.destroy((err: Error) => {
-        if (err) {
-          return reject({ message: 'Logout failed' });
-        }
-        resolve({ message: 'Logout successful' });
-      });
-    });
+  @UseGuards(AuthGuard)
+  async logout(@Req() req: CustomRequest): Promise<any> {
+    const sessionId = req.session ? req.session.id : '';
+    return this.authService.logout(sessionId);
   }
 
-  @Post('session')
-  @UseGuards(AuthGuard)
-  getSession(@CurrentUser() userId: string) {
-    return { userId };
+  @Get('session')
+  async getSession(@CurrentUser() userId: string): Promise<any> {
+    if (!userId) {
+      return { message: 'No active session.' };
+    }
+    return { message: 'Active session found.', userId };
   }
 }

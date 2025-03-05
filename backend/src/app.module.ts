@@ -1,25 +1,27 @@
 import { Module } from '@nestjs/common';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ConfigModule } from './config/config.module';
 import { DatabaseModule } from './database/database.module';
-import { AuthModule } from './auth/auth.module';
-import { HealthModule } from './health/health.module';
-import { FriendsModule } from './friends/friends.module';
-import { UsersModule } from './users/users.module';
+import { EncryptionModule } from './encryption/encryption.module';
 import { SessionModule } from './session/session.module';
+import { HealthModule } from './health/health.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { FriendsModule } from './friends/friends.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ChannelsModule } from './channels/channels.module';
 
 @Module({
   imports: [
-    EventEmitterModule.forRoot(), // Enables event-driven architecture (for notifications, etc.)
     ConfigModule,
     DatabaseModule,
-    AuthModule,
-    HealthModule,
-    FriendsModule,
-    UsersModule,
+    EncryptionModule,
     SessionModule,
+    HealthModule,
+    UsersModule,
+    AuthModule,
+    FriendsModule,
     NotificationsModule,
+    ChannelsModule,
   ],
 })
 export class AppModule {}

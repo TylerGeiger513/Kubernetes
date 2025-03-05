@@ -1,32 +1,55 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Injectable, ConflictException, UnauthorizedException, Logger } from '@nestjs/common';
+import { UsersRepository } from './users.repository';
+import { IUser } from './users.schema';
 import * as bcrypt from 'bcryptjs';
-import { User, UserDocument } from './users.schema';
+import { SignupDto } from '../auth/dtos/signup.dto';
+import { LoginDto } from '../auth/dtos/login.dto';
 
 @Injectable()
 export class UsersService {
-    constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
+    private readonly logger = new Logger(UsersService.name);
 
-    async findByEmail(email: string): Promise<UserDocument | null> {
-        return this.userModel.findOne({ email }).exec();
-    }
+    constructor(private readonly usersRepository: UsersRepository) { }
 
-    async createUser(email: string, password: string, campus: string): Promise<UserDocument> {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new this.userModel({ email, password: hashedPassword, campus });
-        return newUser.save();
-    }
-
-    async validatePassword(email: string, password: string): Promise<UserDocument | null> {
-        const user = await this.findByEmail(email);
-        if (user && (await bcrypt.compare(password, user.password))) {
-            return user;
+    async registerUser(dto: SignupDto): Promise<IUser> {
+        const { email, username, password, campus } = dto;
+        if (await this.usersRepository.findByEmail(email)) {
+            throw new ConflictException('User with this email already exists.');
         }
-        return null;
+        if (await this.usersRepository.findByIdentifier({ username })) {
+            throw new ConflictException('Username already taken.');
+        }
+        const hashedPassword = await this.hashPassword(password);
+        return this.usersRepository.createUser(email, username, hashedPassword, campus);
     }
 
-    async findById(id: string): Promise<UserDocument | null> {
-        return this.userModel.findById(id).exec();
+    async findUserByIdentifier(identifier: { id?: string; email?: string; username?: string }): Promise<IUser | null> {
+        return this.usersRepository.findByIdentifier(identifier);
+    }
+
+    async validateUserCredentials(dto: LoginDto): Promise<IUser> {
+        this.logger.log(`Validating user credentials for ${dto.identifier}.`);
+        const { identifier, password } = dto;
+        const user = await this.usersRepository.findByIdentifier({
+            id: identifier, email: identifier, username: identifier
+        });
+
+        this.logger.log(`User found: ${user ? user
+            .username : 'none'}.`);
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials.');
+        }
+        if (!(await this.comparePasswords(password, user.password))) {
+            throw new UnauthorizedException('Invalid credentials.');
+        }
+        return user;
+    }
+
+    private async hashPassword(password: string): Promise<string> {
+        return bcrypt.hash(password, 10);
+    }
+
+    private async comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean> {
+        return bcrypt.compare(plainPassword, hashedPassword);
     }
 }

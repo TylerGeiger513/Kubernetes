@@ -3,6 +3,7 @@ import {
     WebSocketServer,
     OnGatewayConnection,
     OnGatewayDisconnect,
+    SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import * as cookie from 'cookie';
@@ -11,17 +12,25 @@ import { ConfigService } from '../config/config.service';
 import { SessionService } from '../session/session.service';
 import { Logger } from '@nestjs/common';
 
+/**
+ * @class NotificationsGateway
+ * @description Handles WebSocket connections and dispatches notifications.
+ * Uses session-based authentication to map clients to user IDs.
+ */
 @WebSocketGateway({
-    namespace: '/api/notifications',
-    path: '/api/notifications/socket.io',
-    cors: { origin: 'http://localhost', credentials: true },
+    namespace: '/notifications',
+    cors: {
+        origin: '*', // Update this as needed for security.
+        credentials: true,
+    },
 })
 export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
-    @WebSocketServer() server!: Server;
-    private readonly logger = new Logger(NotificationsGateway.name);
+    @WebSocketServer()
+    server: Server;
 
-    // Map to track connected clients by user ID.
-    private connectedClients: Map<string, Socket> = new Map();
+    private readonly logger = new Logger(NotificationsGateway.name);
+    // Map to store connected client sockets by user ID.
+    private clients: Map<string, Socket> = new Map();
 
     constructor(
         private readonly configService: ConfigService,
@@ -30,69 +39,66 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
 
     async handleConnection(client: Socket) {
         try {
-            this.logger.log('Client connected with ID: ' + client.id, client.handshake.headers.cookie);
-
-            // Parse cookies from the handshake headers.
+            // Extract cookies from handshake headers.
             const cookies = cookie.parse(client.handshake.headers.cookie || '');
-            const rawCookie = cookies['connect.sid']; // Adjust if your cookie name is different.
+            const rawCookie = cookies['connect.sid'];
             if (!rawCookie) {
-                this.logger.error('No session cookie found.');
+                this.logger.error('No session cookie found. Disconnecting client.');
                 client.disconnect();
                 return;
             }
-
-            // URL-decode the cookie value.
-            const decodedCookie = decodeURIComponent(rawCookie);
-            this.logger.log(`Decoded cookie: ${decodedCookie}`);
-
-            // Unsign the decoded cookie using the session secret.
-            const encryptedPayload = signature.unsign(decodedCookie, this.configService.sessionSecret);
-            if (!encryptedPayload) {
-                this.logger.error('Invalid session cookie. Check if your session secret matches.');
+            // Unsign cookie using session secret.
+            const unsigned = signature.unsign(rawCookie, this.configService.sessionSecret);
+            if (!unsigned) {
+                this.logger.error('Invalid session signature. Disconnecting client.');
                 client.disconnect();
                 return;
             }
-
-            // Retrieve and validate the session using the SessionService.
-            const session = await this.sessionService.getSession(encryptedPayload);
+            // Retrieve session data using SessionService.
+            const session = await this.sessionService.getSession(unsigned);
             if (!session || !session.userId) {
-                this.logger.error('Unauthenticated session.');
+                this.logger.error('Unauthenticated session. Disconnecting client.');
                 client.disconnect();
                 return;
             }
-
-            // Store the connection using the authenticated userId.
-            this.connectedClients.set(session.userId, client);
-            this.logger.log(`Client connected with userId: ${session.userId}`);
-            console.log(`Client connected with userId: ${session.userId}`);
+            // Map the socket by userId.
+            this.clients.set(session.userId, client);
+            this.logger.log(`Client connected: userId=${session.userId}`);
         } catch (error) {
-            console.error('Error during WebSocket authentication:', error);
+            this.logger.error('Error during connection authentication:', error);
             client.disconnect();
         }
     }
 
-
     handleDisconnect(client: Socket) {
-        // Remove the client from the connectedClients map.
-        this.connectedClients.forEach((socket, userId) => {
+        // Remove the disconnected client from the map.
+        for (const [userId, socket] of this.clients.entries()) {
             if (socket.id === client.id) {
-                this.connectedClients.delete(userId);
-                this.logger.log(`Client disconnected with userId: ${userId}`);
+                this.clients.delete(userId);
+                this.logger.log(`Client disconnected: userId=${userId}`);
+                break;
             }
-        });
+        }
     }
 
     /**
-     * Sends a friend request notification to a specific user.
-     * @param targetUserId The ID of the user to notify.
-     * @param payload The payload to send.
+     * Sends a notification to a specific user.
+     * @param userId - The target user ID.
+     * @param payload - The notification payload.
      */
-    sendFriendRequestNotification(targetUserId: string, payload: any) {
-        this.logger.log(`Attempting to send friend request notification to: ${targetUserId}`);
-        const client = this.connectedClients.get(targetUserId);
+    sendNotification(userId: string, payload: any): void {
+        const client = this.clients.get(userId);
         if (client) {
-            this.logger.log(`Sending friend request notification to: ${targetUserId} with payload: ${JSON.stringify(payload)}`);
-            client.emit('friendRequest', payload);
+            client.emit('notification', payload);
+            this.logger.log(`Notification sent to user ${userId}: ${JSON.stringify(payload)}`);
+        } else {
+            this.logger.warn(`Attempted to notify user ${userId}, but they are not connected.`);
         }
+    }
+
+    // Example of a handler for an incoming event (if needed).
+    @SubscribeMessage('ping')
+    handlePing(client: Socket, payload: any): void {
+        client.emit('pong', payload);
     }
 }

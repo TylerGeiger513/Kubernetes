@@ -1,16 +1,22 @@
-// Health endpoint that verifies mongo & redis connections
+/**
+ * @file health.controller.ts
+ * @description Provides an endpoint to check the overall health of the application, 
+ * including MongoDB and Redis connectivity.
+ */
 
-import { Controller, Get } from "@nestjs/common";
-import { HealthService } from "./health.service";
+import { Controller, Get } from '@nestjs/common';
+import { HealthService } from './health.service';
 
-@Controller("health")
+@Controller('health')
 export class HealthController {
-    // Inject HealthService
-    constructor(private readonly healthService: HealthService) { }
+  constructor(private readonly healthService: HealthService) { }
 
-    @Get()
-    async healthCheck(): Promise<{ redis: string; mongo: string }> {
-        return this.healthService.checkDatabaseHealth();
-    }
+  /**
+   * Health check endpoint.
+   * @returns An object with health status of Redis and MongoDB.
+   */
+  @Get()
+  async healthCheck(): Promise<{ redis: string; mongo: string }> {
+    return this.healthService.checkDatabaseHealth();
+  }
 }
-

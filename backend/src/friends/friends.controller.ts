@@ -1,108 +1,78 @@
-// src/friends/friends.controller.ts
-import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { FriendsService } from './friends.service';
+import { FriendRequestDto } from './dtos/friend-request.dto';
 import { AuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
-import { FriendRequestDto } from './dtos/friend-request.dto';
 
+/**
+ * @class FriendsController
+ * @description Exposes endpoints for managing friend relationships.
+ */
 @Controller('friends')
 @UseGuards(AuthGuard)
 export class FriendsController {
-  constructor(private readonly friendsService: FriendsService) {}
+    constructor(private readonly friendsService: FriendsService) { }
 
-  /**
-   * Send a friend request.
-   * Body: { friendId: string }
-   */
-  @Post('add')
-  async sendFriendRequest(
-    @CurrentUser() currentUserId: string,
-    @Body() friendRequestDto: FriendRequestDto,
-  ) {
-    await this.friendsService.sendFriendRequest(currentUserId, friendRequestDto.friendId);
-    return { message: 'Friend request sent.' };
-  }
+    @Post('request')
+    async sendFriendRequest(
+        @CurrentUser() currentUserId: string,
+        @Body() dto: FriendRequestDto,
+    ): Promise<any> {
+        await this.friendsService.sendFriendRequest(currentUserId, dto.target);
+        return { message: 'Friend request sent.' };
+    }
 
-  /**
-   * Accept a friend request.
-   * Body: { friendId: string }
-   */
-  @Post('accept')
-  async acceptFriendRequest(
-    @CurrentUser() currentUserId: string,
-    @Body() friendRequestDto: FriendRequestDto,
-  ) {
-    await this.friendsService.acceptFriendRequest(currentUserId, friendRequestDto.friendId);
-    return { message: 'Friend request accepted.' };
-  }
+    @Post('accept')
+    async acceptFriendRequest(
+        @CurrentUser() currentUserId: string,
+        @Body() dto: FriendRequestDto,
+    ): Promise<any> {
+        await this.friendsService.acceptFriendRequest(currentUserId, dto.target);
+        return { message: 'Friend request accepted.' };
+    }
 
-  /**
-   * Reject a friend request.
-   * Body: { friendId: string }
-   */
-  @Post('reject')
-  async rejectFriendRequest(
-    @CurrentUser() currentUserId: string,
-    @Body() friendRequestDto: FriendRequestDto,
-  ) {
-    await this.friendsService.rejectFriendRequest(currentUserId, friendRequestDto.friendId);
-    return { message: 'Friend request rejected.' };
-  }
+    @Post('deny')
+    async denyFriendRequest(
+        @CurrentUser() currentUserId: string,
+        @Body() dto: FriendRequestDto,
+    ): Promise<any> {
+        await this.friendsService.denyFriendRequest(currentUserId, dto.target);
+        return { message: 'Friend request denied.' };
+    }
 
-  /**
-   * Remove a friend.
-   * Body: { friendId: string }
-   */
-  @Post('remove')
-  async removeFriend(
-    @CurrentUser() currentUserId: string,
-    @Body() friendRequestDto: FriendRequestDto,
-  ) {
-    await this.friendsService.removeFriend(currentUserId, friendRequestDto.friendId);
-    return { message: 'Friend removed.' };
-  }
+    @Post('remove')
+    async removeFriend(
+        @CurrentUser() currentUserId: string,
+        @Body() dto: FriendRequestDto,
+    ): Promise<any> {
+        await this.friendsService.removeFriend(currentUserId, dto.target);
+        return { message: 'Friend removed.' };
+    }
 
-  /**
-   * Block a user.
-   * Body: { friendId: string }
-   */
-  @Post('block')
-  async blockUser(
-    @CurrentUser() currentUserId: string,
-    @Body() friendRequestDto: FriendRequestDto,
-  ) {
-    await this.friendsService.blockUser(currentUserId, friendRequestDto.friendId);
-    return { message: 'User blocked.' };
-  }
+    @Post('cancel')
+    async cancelFriendRequest(
+        @CurrentUser() currentUserId: string,
+        @Body() dto: FriendRequestDto,
+    ): Promise<any> {
+        await this.friendsService.cancelFriendRequest(currentUserId, dto.target);
+        return { message: 'Friend request cancelled.' };
+    }
 
-  /**
-   * Unblock a user.
-   * Body: { friendId: string }
-   */
-  @Post('unblock')
-  async unblockUser(
-    @CurrentUser() currentUserId: string,
-    @Body() friendRequestDto: FriendRequestDto,
-  ) {
-    await this.friendsService.unblockUser(currentUserId, friendRequestDto.friendId);
-    return { message: 'User unblocked.' };
-  }
+    @Post('block')
+    async blockUser(
+        @CurrentUser() currentUserId: string,
+        @Body() dto: FriendRequestDto,
+    ): Promise<any> {
+        await this.friendsService.blockUser(currentUserId, dto.target);
+        return { message: 'User blocked.' };
+    }
 
-  /**
-   * Get the current user's friend list.
-   */
-  @Get('list')
-  async getFriends(@CurrentUser() currentUserId: string) {
-    const friends = await this.friendsService.getFriendsList(currentUserId);
-    return { friends };
-  }
-
-  /**
-   * Get incoming friend requests.
-   */
-  @Get('requests')
-  async getFriendRequests(@CurrentUser() currentUserId: string) {
-    const requests = await this.friendsService.getFriendRequests(currentUserId);
-    return { requests };
-  }
+    @Post('unblock')
+    async unblockUser(
+        @CurrentUser() currentUserId: string,
+        @Body() dto: FriendRequestDto,
+    ): Promise<any> {
+        await this.friendsService.unblockUser(currentUserId, dto.target);
+        return { message: 'User unblocked.' };
+    }
 }

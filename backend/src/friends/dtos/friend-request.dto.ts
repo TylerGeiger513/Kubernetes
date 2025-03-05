@@ -1,5 +1,7 @@
-// src/friends/dtos/friend-request.dto.ts
+/**
+ * @file friend-request.dto.ts
+ * @description DTO for friend operations. The "target" property can be a user id, email, or username.
+ */
 export class FriendRequestDto {
-    readonly friendId!: string;
-  }
-  
+  readonly target!: string;
+}

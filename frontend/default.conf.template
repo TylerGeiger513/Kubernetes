@@ -9,9 +9,17 @@ server {
     proxy_set_header X-Real-IP $remote_addr;
   }
 
-  # Proxy WebSocket connections (e.g., for notifications)
+  # Proxy WebSocket connections for notifications and channels
   location /api/notifications/ {
     proxy_pass http://$NGINX_BACKEND_UPSTREAM/api/notifications/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+  }
+  
+  location /channels/ {
+    proxy_pass http://$NGINX_BACKEND_UPSTREAM/channels/;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
