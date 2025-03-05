@@ -8,20 +8,31 @@
   display: flex;
   padding: 20px;
   gap: 20px;
+  height: calc(100vh - 80px);
+}
+
+.friends-section {
+  max-width: 50%; 
 }
 
 .friends-section,
 .chats-section {
-  background-color: #2C2F33;
-  padding: 20px;
-  border-radius: 5px;
-  flex: 1;
+background-color: #2C2F33;
+padding: 20px;
+border-radius: 5px;
+flex: 1;
+display: flex;
+flex-direction: column;
+overflow: hidden; 
 }
 
 .friends-list,
 .chats-list {
-  list-style: none;
-  padding: 0;
+list-style: none;
+padding: 0;
+overflow-y: auto; 
+flex-grow: 1; 
+margin: 10px 0;
 }
 
 .friend-item,
@@ -146,7 +157,6 @@
   }
 }
 
-/* Ensure TopBar styles are consistent with ServerUI */
 
 .modal-textbox {
   box-sizing: border-box;
@@ -230,8 +240,8 @@
 }
 
 .error-message {
-  color: #e74c3c; /* Professional red for errors */
-  background-color: #2C2F33; /* Matches modal background */
+  color: #e74c3c;
+  background-color: #2C2F33; 
   padding: 10px;
   margin-bottom: 10px;
   border-radius: 5px;

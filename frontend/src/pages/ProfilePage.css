@@ -1,213 +1,28 @@
-/* ProfilePage.css */
 .profile-page {
   background-color: #23272A;
-  color: white;
-  font-family: Arial, sans-serif;
-  height: 100vh;
+  color: #DCDDDE;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Prevent whole page scrolling */
 }
 
-.top-bar {
-  display: flex;
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #23272A;
-  border-bottom: 1px solid #2C2F33;
-}
-
-.server-info {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.icon {
-  color: #DCDDDE;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-.icon:hover {
-  color: #ffffff;
-}
-
-.profile-content {
-  padding: 20px;
+.construction-message {
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 600px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.add-friend {
-  display: flex;
   align-items: center;
-  margin-bottom: 20px;
-}
-
-.friend-input {
-  flex: 1;
-  padding: 10px;
-  background-color: #2C2F33;
-  border: 1px solid #1A1D21;
-  border-radius: 5px;
-  color: #DCDDDE;
-  margin-right: 10px;
-}
-
-.friend-input:focus {
-  outline: none;
-  border-color: #29b9f2;
-}
-
-.add-button {
-  padding: 10px 15px;
-  background-color: #29b9f2;
-  border: none;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.add-button:hover {
-  background-color: #1a8cd8;
-}
-
-
-
-.friends-list-container {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 10px; /* Add padding for scrollbar */
-}
-
-/* Custom Scrollbar for Friends List (same as ServerUI chat) */
-.friends-list-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.friends-list-container::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 4px;
-}
-
-.friends-list-container::-webkit-scrollbar-thumb {
-  background: transparent;
-  transition: background 0.3s;
-}
-
-.friends-list-container:hover::-webkit-scrollbar-thumb {
-  background: #4F545C;
-}
-
-/* For Firefox */
-.friends-list-container {
-  scrollbar-width: thin;
-  scrollbar-color: #4F545C #2C2F33;
-}
-
-.friends-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.friend-item {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: #2C2F33;
-  margin-bottom: 5px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.friend-item:hover {
-  background-color: #3A3F45;
-}
-
-.friend-item .avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: #29b9f2;
-  text-align: center;
-  line-height: 30px;
-  margin-right: 10px;
-  flex-shrink: 0;
-}
-
-.friend-item span {
-  color: #DCDDDE;
-}
-
-/* Popup Styles */
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.popup-content {
-  background-color: #2C2F33;
+  text-align: center;
   padding: 20px;
-  border-radius: 10px;
-  width: 300px;
-  position: relative;
 }
 
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  color: #DCDDDE;
-  font-size: 20px;
-  cursor: pointer;
+.construction-message h1 {
+  color: #29b9f2;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
 }
 
-.close-button:hover {
-  color: #ffffff;
-}
-
-.user-profile {
-  text-align: center;
-}
-
-.profile-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background-color: #29b9f2;
-  text-align: center;
-  line-height: 80px;
-  font-size: 40px;
-  margin: 0 auto 10px;
-}
-
-.remove-button {
-  margin-top: 10px;
-  padding: 10px 15px;
-  background-color: #F04747;
-  border: none;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.remove-button:hover {
-  background-color: #d13a3a;
+.construction-message p {
+  color: #72767D;
+  font-size: 1.2rem;
 }
