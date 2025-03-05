@@ -1,0 +1,30 @@
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #23272A;
+    padding: 10px 20px;
+    border-bottom: 1px solid #2C2F33;
+  }
+  
+  .server-info {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .icons {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .top-bar-icon {
+    color: #DCDDDE;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  
+  .top-bar-icon:hover {
+    color: #ffffff;
+  }

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaCog, FaUser, FaVolumeUp, FaTimes } from 'react-icons/fa';
-import { HiPaperAirplane } from "react-icons/hi2";
-import { Link } from 'react-router-dom';
+import { FaVolumeUp, FaTimes } from 'react-icons/fa';
+import { HiPaperAirplane } from 'react-icons/hi2';
+import TopBar from '../components/TopBar'; 
 import './ServerUI.css';
 
 const ServerUI = () => {
   const [selectedChannel, setSelectedChannel] = useState('# general');
-  const [selectedUser, setSelectedUser] = useState(null); // State for selected user
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // State for popup visibility
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
 
   return (
     <div className="app-container">
@@ -15,8 +15,8 @@ const ServerUI = () => {
       <MainContainer
         selectedChannel={selectedChannel}
         setSelectedChannel={setSelectedChannel}
-        setSelectedUser={setSelectedUser} // Pass setter to MainContainer
-        setIsPopupOpen={setIsPopupOpen}   // Pass setter to MainContainer
+        setSelectedUser={setSelectedUser}
+        setIsPopupOpen={setIsPopupOpen}
       />
       {isPopupOpen && (
         <UserProfilePopup
@@ -27,18 +27,6 @@ const ServerUI = () => {
     </div>
   );
 };
-
-const TopBar = () => (
-  <div className="top-bar">
-    <div className="server-info">Campus Connect</div>
-    <div className="icons">
-      <FaCog className="icon" style={{ marginRight: 15 }} />
-      <Link to="/profile">
-        <FaUser className="icon" />
-      </Link>
-    </div>
-  </div>
-);
 
 const MainContainer = ({ selectedChannel, setSelectedChannel, setSelectedUser, setIsPopupOpen }) => (
   <div className="main-container">

@@ -147,29 +147,6 @@
 }
 
 /* Ensure TopBar styles are consistent with ServerUI */
-.top-bar {
-  background-color: #2C2F33;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.server-info {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.icons {
-  display: flex;
-  align-items: center;
-}
-
-.icon {
-  font-size: 20px;
-  cursor: pointer;
-  color: #DCDDDE;
-}
 
 .modal-textbox {
   box-sizing: border-box;
@@ -253,7 +230,7 @@
 }
 
 .error-message {
-  color: #e74c3c; 
+  color: #e74c3c; /* Professional red for errors */
   background-color: #2C2F33; /* Matches modal background */
   padding: 10px;
   margin-bottom: 10px;

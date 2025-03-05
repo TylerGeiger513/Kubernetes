@@ -1,7 +1,6 @@
-// ProfilePage.js
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FaArrowLeft, FaTimes } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
+import TopBar from '../components/TopBar'; 
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -18,18 +17,13 @@ const ProfilePage = () => {
   };
 
   const handleRemoveFriend = () => {
-    setFriends(friends.filter(f => f !== selectedFriend));
+    setFriends(friends.filter((f) => f !== selectedFriend));
     setIsPopupOpen(false);
   };
 
   return (
     <div className="profile-page">
-      <div className="top-bar">
-        <Link to="/">
-          <FaArrowLeft className="icon" style={{ marginRight: 15 }} />
-        </Link>
-        <div className="server-info">My Profile</div>
-      </div>
+      <TopBar title="My Profile" />
       <div className="profile-content">
         <h2>Friends</h2>
         <div className="add-friend">

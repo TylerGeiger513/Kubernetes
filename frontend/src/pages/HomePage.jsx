@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FaPlus, FaCog, FaUser, FaCheckSquare, FaRegSquare } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { FaPlus, FaCheckSquare, FaRegSquare } from 'react-icons/fa';
+import TopBar from '../components/TopBar'; 
 import './HomePage.css';
 
 const HomePage = () => {
@@ -31,7 +31,7 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      <TopBar />
+      <TopBar /> {/* Uses default title "Campus Connect" */}
       <div className="content">
         <div className="friends-section">
           <h2>Friends</h2>
@@ -59,28 +59,16 @@ const HomePage = () => {
   );
 };
 
-const TopBar = () => (
-  <div className="top-bar">
-    <div className="server-info">Campus Connect</div>
-    <div className="icons">
-      <FaCog className="icon" style={{ marginRight: 15 }} />
-      <Link to="/profile">
-        <FaUser className="icon" />
-      </Link>
-    </div>
-  </div>
-);
-
 const FriendsList = ({ friends }) => (
-    <ul className="friends-list">
-      {friends.map((friend) => (
-        <li key={friend.id} className="friend-item">
-          <div className="avatar">{friend.name[0]}</div>
-          <span>{friend.name}</span>
-        </li>
-      ))}
-    </ul>
-  );
+  <ul className="friends-list">
+    {friends.map((friend) => (
+      <li key={friend.id} className="friend-item">
+        <div className="avatar">{friend.name[0]}</div>
+        <span>{friend.name}</span>
+      </li>
+    ))}
+  </ul>
+);
 
 const ChatsList = ({ chats }) => (
   <ul className="chats-list">
@@ -110,21 +98,21 @@ const CreateChatModal = ({ friends, onCreate, onClose }) => {
 
   const handleSubmit = () => {
     if (!chatName.trim()) {
-      setError('Chat name is required.'); // Display error if name is missing
+      setError('Chat name is required.');
       return;
     }
     if (selectedFriends.length === 0) {
-      setError('Please select at least one friend.'); // Optional friend check
+      setError('Please select at least one friend.');
       return;
     }
-    onCreate(selectedFriends, chatName); // Proceed if valid
+    onCreate(selectedFriends, chatName);
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h3>Create New Chat</h3>
-        {error && <div className="error-message">{error}</div>} {/* Error display */}
+        {error && <div className="error-message">{error}</div>}
         <input
           className="modal-textbox"
           type="text"
@@ -132,7 +120,7 @@ const CreateChatModal = ({ friends, onCreate, onClose }) => {
           value={chatName}
           onChange={(e) => {
             setChatName(e.target.value);
-            setError(''); // Clear error as user types
+            setError('');
           }}
         />
         <div className="friends-selection">
