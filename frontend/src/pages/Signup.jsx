@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
-import './Auth.css'; 
+import './styles/Auth.css'; 
 
 const Signup = () => {
   const handleSubmit = (e) => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../pages/HomePage.css'; // Import the existing CSS to maintain the look
+import '../pages/styles/HomePage.css'; // Import the existing CSS to maintain the look
 
 const ChatsList = ({ chats }) => (
   <ul className="chats-list">

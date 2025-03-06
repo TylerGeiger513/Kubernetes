@@ -3,7 +3,7 @@ import { FaPlus, FaCheckSquare, FaRegSquare } from 'react-icons/fa';
 import TopBar from '../components/TopBar';
 import FriendsList from '../components/FriendsList';
 import ChatsList from '../components/ChatsList'; // Import the new component
-import '../pages/HomePage.css';
+import './styles/HomePage.css';
 
 const HomePage = () => {
   const [friends] = useState([

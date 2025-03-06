@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TopBar from '../components/TopBar';
 import MainContainer from '../components/MainContainer';
 import UserProfilePopup from '../components/UserProfilePopup';
-import './ChatsUI.css';
+import './styles/ChatsUI.css';
 
 // Sample chat data
 const chatsData = [

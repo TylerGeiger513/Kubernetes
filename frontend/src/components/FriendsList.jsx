@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import './FriendsList.css'; 
+import './styles/FriendsList.css'; 
 
 const FriendsList = () => {
   const [friends, setFriends] = useState(['alice', 'bob', 'charlie']);

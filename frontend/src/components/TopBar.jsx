@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaComments, FaUser, FaHome } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import './TopBar.css';
+import './styles/TopBar.css';
 
 const TopBar = () => (
   <div className="top-bar">

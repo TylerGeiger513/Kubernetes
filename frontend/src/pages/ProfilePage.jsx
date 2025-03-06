@@ -1,6 +1,6 @@
 import React from 'react';
 import TopBar from '../components/TopBar';
-import './ProfilePage.css';
+import './styles/ProfilePage.css';
 
 const ProfilePage = () => {
   return (
