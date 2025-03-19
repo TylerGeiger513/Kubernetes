@@ -7,10 +7,10 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import * as cookie from 'cookie';
-import * as signature from 'cookie-signature';
 import { ConfigService } from '../config/config.service';
 import { SessionService } from '../session/session.service';
-import { Logger } from '@nestjs/common';
+import { Logger, OnModuleInit } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 /**
  * @class NotificationsGateway
@@ -19,12 +19,13 @@ import { Logger } from '@nestjs/common';
  */
 @WebSocketGateway({
     namespace: '/notifications',
+    path: '/notifications/socket.io',
     cors: {
         origin: '*', // Update this as needed for security.
         credentials: true,
     },
 })
-export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisconnect, OnModuleInit {
     @WebSocketServer()
     server: Server;
 
@@ -35,11 +36,26 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
     constructor(
         private readonly configService: ConfigService,
         private readonly sessionService: SessionService,
+        private readonly eventEmitter: EventEmitter2, // Inject EventEmitter2
     ) { }
+
+    onModuleInit() {
+        // Subscribe to notification events via EventEmitter2.
+        this.eventEmitter.on('notification.sent', (notification) => {
+            if (notification && notification.userId) {
+                const client = this.clients.get(notification.userId);
+                if (client) {
+                    client.emit('notification', notification);
+                    this.logger.log(`Notification sent to user ${notification.userId}: ${JSON.stringify(notification)}`);
+                } else {
+                    this.logger.warn(`Attempted to notify user ${notification.userId}, but they are not connected.`);
+                }
+            }
+        });
+    }
 
     async handleConnection(client: Socket) {
         try {
-            // Extract cookies from handshake headers.
             const cookies = cookie.parse(client.handshake.headers.cookie || '');
             const rawCookie = cookies['connect.sid'];
             if (!rawCookie) {
@@ -47,15 +63,10 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
                 client.disconnect();
                 return;
             }
-            // Unsign cookie using session secret.
-            const unsigned = signature.unsign(rawCookie, this.configService.sessionSecret);
-            if (!unsigned) {
-                this.logger.error('Invalid session signature. Disconnecting client.');
-                client.disconnect();
-                return;
-            }
-            // Retrieve session data using SessionService.
-            const session = { userId: 'test' }
+            this.logger.log(`Client connected: rawCookie=${rawCookie}`);
+
+            // Retrieve session using the same method as in ChannelsGateway.
+            const session = await this.sessionService.getSessionFromRawCookie(rawCookie);
             if (!session || !session.userId) {
                 this.logger.error('Unauthenticated session. Disconnecting client.');
                 client.disconnect();
@@ -82,11 +93,13 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
     }
 
     /**
-     * Sends a notification to a specific user.
-     * @param userId - The target user ID.
-     * @param payload - The notification payload.
-     */
-    sendNotification(userId: string, payload: any): void {
+  * Sends a notification to a specific user.
+  * This method is now available so that notifications.service.ts
+  * can call it without error.
+  * @param userId - The target user ID.
+  * @param payload - The notification payload.
+  */
+    public sendNotification(userId: string, payload: any): void {
         const client = this.clients.get(userId);
         if (client) {
             client.emit('notification', payload);
@@ -95,8 +108,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
             this.logger.warn(`Attempted to notify user ${userId}, but they are not connected.`);
         }
     }
-
-    // Example of a handler for an incoming event (if needed).
+    
     @SubscribeMessage('ping')
     handlePing(client: Socket, payload: any): void {
         client.emit('pong', payload);

@@ -10,15 +10,15 @@ server {
   }
 
   # Proxy WebSocket connections for notifications and channels
-  location /api/notifications/ {
-    proxy_pass http://$NGINX_BACKEND_UPSTREAM/api/notifications/;
+  location /notifications/socket.io {
+    proxy_pass http://$NGINX_BACKEND_UPSTREAM/notifications/socket.io;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
     proxy_set_header Host $host;
   }
   
-  location /channels/socket.io/ {
+  location /channels/socket.io {
     proxy_pass http://$NGINX_BACKEND_UPSTREAM/channels/socket.io/;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;

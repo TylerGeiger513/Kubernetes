@@ -13,3 +13,10 @@ export const createSocket = () => {
     withCredentials: true 
   });
 };
+
+export const createNotificationsSocket = () => {
+  return io('/notifications', { 
+    path: '/notifications/socket.io', 
+    withCredentials: true 
+  });
+};

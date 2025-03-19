@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Auth from './components/Auth';
 import Friends from './components/Friends';
+import Notifications from './components/Notifications';
 import { api } from './utils/api';
 
 function App() {
@@ -11,7 +12,6 @@ function App() {
     api.get('/auth/session', { withCredentials: true })
       .then((res) => {
         if (res.data && res.data.userId) {
-          // For simplicity, assume userId and username are returned.
           setUser({ userId: res.data.userId, username: res.data.userId });
         }
       })
@@ -24,6 +24,7 @@ function App() {
         <div>
           <h1>Welcome, {user.username}</h1>
           <Friends user={user} />
+          <Notifications />
         </div>
       ) : (
         <Auth onAuthSuccess={(userData) => setUser(userData)} />

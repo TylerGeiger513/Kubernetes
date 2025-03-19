@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../utils/api';
+import { api, createNotificationsSocket } from '../utils/api';
 import ChatWindow from './ChatWindow';
 
 function Friends({ user }) {
@@ -13,12 +13,30 @@ function Friends({ user }) {
   // Helper to extract friend identifier.
   const getFriendId = (friend) => friend.id || friend._id;
 
-  // Fetch all lists on mount.
+  // Initial fetch of all lists.
   useEffect(() => {
     fetchFriends();
     fetchIncomingRequests();
     fetchSentRequests();
     fetchBlockedUsers();
+  }, []);
+
+  // Set up real-time updates via notifications socket.
+  useEffect(() => {
+    const socket = createNotificationsSocket();
+    socket.on('friendsList', (data) => {
+      setFriends(data.friends || []);
+    });
+    socket.on('incomingRequests', (data) => {
+      setIncomingRequests(data.requests || []);
+    });
+    socket.on('sentRequests', (data) => {
+      setSentRequests(data.requests || []);
+    });
+    socket.on('blockedUsers', (data) => {
+      setBlockedUsers(data.blockedUsers || []);
+    });
+    return () => socket.disconnect();
   }, []);
 
   const fetchFriends = async () => {
@@ -141,7 +159,6 @@ function Friends({ user }) {
 
   const handleChat = (friend) => {
     setSelectedChatFriend(friend);
-
   };
 
   const handleCloseChat = () => {

@@ -1,6 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createNotificationsSocket } from '../utils/api';
 
-function Notifications({ notifications }) {
+function Notifications() {
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    const socket = createNotificationsSocket();
+    socket.on('notification', (data) => {
+      setNotifications((prev) => [...prev, data]);
+    });
+    return () => socket.disconnect();
+  }, []);
+
   return (
     <div>
       <h2>Notifications</h2>
