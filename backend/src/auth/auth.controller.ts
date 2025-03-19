@@ -5,6 +5,7 @@ import { LoginDto } from './dtos/login.dto';
 import { AuthGuard } from './auth.guard';
 import { Request } from 'express';
 import { CurrentUser } from './current-user.decorator';
+import { userInfo } from 'os';
 
 
 @Controller('auth')
@@ -41,4 +42,15 @@ export class AuthController {
     }
     return { message: 'Active session found.', userId };
   }
+  
+  // Protected: Get current user profile
+  @UseGuards(AuthGuard)
+  @Get('profile')
+  async getProfile(@CurrentUser() userId: string): Promise<any> {
+    if (!userId) {
+      return { message: 'No active session.' };
+    } 
+    return this.authService.getProfile(userId);
+  }
+
 }

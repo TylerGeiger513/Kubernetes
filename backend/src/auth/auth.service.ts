@@ -58,4 +58,12 @@ export class AuthService {
     await this.sessionService.destroySession(sessionId);
     return { message: 'Logout successful' };
   }
+
+  async getProfile(userId: string): Promise<any> {
+    const user = await this.usersService.findUserByIdentifier({ id: userId });
+    if (!user) {
+      throw new Error('User not found.');
+    }
+    return user;
+  }
 }
