@@ -1,12 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ChannelsRepository } from './channels.repository';
 import { IChannel } from './channel.schema';
+import { UsersRepository } from '../users/users.repository';
 
 @Injectable()
 export class ChannelsService {
     private readonly logger = new Logger(ChannelsService.name);
 
-    constructor(private readonly channelsRepository: ChannelsRepository) { }
+    constructor(private readonly channelsRepository: ChannelsRepository,
+        private readonly usersRepository: UsersRepository
+    ) { }
 
     /**
      * Retrieves all channels that a user participates in.
@@ -24,8 +27,14 @@ export class ChannelsService {
         if (existing) {
             return existing;
         }
-        this.logger.log(`Creating new DM channel between ${userId1} and ${userId2}.`);
+        const user1 = await this.usersRepository.findByIdentifier({ id: userId1});
+        const user2 = await this.usersRepository.findByIdentifier( { id: userId1});
+        if (!user1 || !user2) {
+            throw new Error('One or more users not found.');
+        }
+        this.logger.log(`Creating new DM channel between ${user1.username} and ${user2}.`);
         return this.channelsRepository.createChannel({
+            name: `${user1.username} and ${user2.username}`,
             type: 'DM',
             participants: [userId1, userId2],
         });

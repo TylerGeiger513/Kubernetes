@@ -5,7 +5,7 @@ import { LoginDto } from './dtos/login.dto';
 import { AuthGuard } from './auth.guard';
 import { Request } from 'express';
 import { CurrentUser } from './current-user.decorator';
-import { userInfo } from 'os';
+import { ExistsDto } from './dtos/exists.dto';
 
 
 @Controller('auth')
@@ -41,6 +41,17 @@ export class AuthController {
       return { message: 'No active session.' };
     }
     return { message: 'Active session found.', userId };
+  }
+
+  /**
+   * 
+   * @param dto 
+   * @returns
+   */
+  @Post('exists')
+  async checkUserExists(@Body() dto: ExistsDto): Promise<any> {
+    const user = await this.authService.checkUserExists(dto);
+    return { exists: !!user };
   }
   
   // Protected: Get current user profile

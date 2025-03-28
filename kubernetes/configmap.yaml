@@ -9,8 +9,6 @@ data:
   DOMAIN: "localhost"
   BACKEND_PORT: "3000"
   FRONTEND_PORT: "8080"
-  WS_PORT: "3001"
-  WS_PATH: "/ws"
   MONGO_HOST: "mongo"
   MONGO_PORT: "27017"
   MONGO_DB: "campusconnect_db"
@@ -24,7 +22,7 @@ data:
   ENCRYPTION_KEY: "super_secret"
   
   # New keys (from configuration.ts)
-  NODE_ENV: "development"         # Change to "production" in production
+  NODE_ENV: "production"         # Change to "production" in production
   SITE_DOMAIN: "http://localhost"        # Use this as your site domain (mirroring DOMAIN)
   API_PREFIX: "api"               # Global API prefix
   PORT: "3000"                    # Use the same as BACKEND_PORT to maintain consistency

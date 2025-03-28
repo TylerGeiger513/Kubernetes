@@ -1,0 +1,22 @@
+apiVersion: skaffold/v4beta6
+kind: Config
+metadata:
+  name: campus-connect
+
+build:
+  artifacts:
+    - image: campus-connect-backend
+      context: .
+      docker:
+        dockerfile: Dockerfile.backend.prod
+    - image: campus-connect-frontend
+      context: .
+      docker:
+        dockerfile: Dockerfile.frontend.prod
+
+manifests:
+  rawYaml:
+    - kubernetes/*.yaml
+
+deploy:
+  kubectl: {}

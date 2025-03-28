@@ -5,6 +5,7 @@
  */
 
 import { MongooseModuleAsyncOptions } from '@nestjs/mongoose';
+
 import { ConfigService } from '../config/config.service';
 import { Logger } from '@nestjs/common';
 import { createClient, RedisClientType } from 'redis';
@@ -19,6 +20,7 @@ export const mongoProvider: MongooseModuleAsyncOptions = {
   useFactory: (configService: ConfigService) => {
     const uri = configService.mongoUri;
     logger.log(`Connecting to MongoDB at ${uri}`);
+
     return {
       uri,
       useNewUrlParser: true,
@@ -41,3 +43,4 @@ export const redisProvider = {
     return client;
   },
 };
+

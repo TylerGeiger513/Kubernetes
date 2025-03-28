@@ -1,0 +1,37 @@
+server {
+  listen 80;
+  server_name %%DOMAIN%%;
+
+  # Proxy API calls to the backend service
+  location /api/ {
+    proxy_pass http://%%NGINX_BACKEND_UPSTREAM%%/api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header Accept-Encoding "";
+    proxy_buffering off;
+    proxy_request_buffering off;
+    
+  }
+
+  # Proxy WebSocket connections for notifications and channels
+  location /notifications/socket.io {
+    proxy_pass http://%%NGINX_BACKEND_UPSTREAM%%/notifications/socket.io;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+  }
+  
+  location /channels/socket.io {
+    proxy_pass http://%%NGINX_BACKEND_UPSTREAM%%/channels/socket.io/;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+  }
+
+  # For any other request, return 404.
+  location / {
+    return 404;
+  }
+}

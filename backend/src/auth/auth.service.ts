@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UseGuards } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { SignupDto } from './dtos/signup.dto';
 import { LoginDto } from './dtos/login.dto';
@@ -64,6 +64,11 @@ export class AuthService {
     if (!user) {
       throw new Error('User not found.');
     }
+    return user;
+  }
+
+  async checkUserExists(dto: any): Promise<any> {
+    const user = await this.usersService.findUserByIdentifier(dto);
     return user;
   }
 }

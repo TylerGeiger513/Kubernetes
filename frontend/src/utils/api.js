@@ -2,8 +2,13 @@ import axios from 'axios';
 import io from 'socket.io-client';
 
 // Use relative paths since NGINX routes /api and /channels appropriately.
+if (process.env.NODE_ENV === 'production') {
+  axios.defaults.baseURL = '/api';
+} else {
+  axios.defaults.baseURL = 'http://localhost:8081/api';
+}
+
 export const api = axios.create({
-  baseURL: '/api',
   withCredentials: true,
 });
 

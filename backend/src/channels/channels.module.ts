@@ -12,7 +12,7 @@ import { ChannelsGuard } from './channels.guard';
 import { ConfigModule } from '../config/config.module';
 import { SessionModule } from '../session/session.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-
+import { UsersModule } from 'src/users/users.module';
 @Module({
   imports: [
     ConfigModule,
@@ -20,6 +20,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     MongooseModule.forFeature([{ name: Channel.name, schema: ChannelSchema }]),
     MongooseModule.forFeature([{ name: Message.name, schema: MessageSchema }]),
     EventEmitterModule.forRoot(),
+    UsersModule,
+
   ],
   providers: [
     ChannelsRepository,
