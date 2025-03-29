@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+LOG="/local/logs/startup.log"
+exec > >(tee -a "$LOG") 2>&1
+
 echo "🚀 Starting Minikube..."
 minikube start --driver=docker
 
