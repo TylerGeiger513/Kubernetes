@@ -22,4 +22,5 @@ export const envValidationSchema = Joi.object({
   SESSION_SECRET: Joi.string().required(),
   ENCRYPTION_KEY: Joi.string().required(),
   COOKIE_SECURE: Joi.boolean().default(false),
+  COOKIE_SAME_SITE: Joi.string().default('strict'),
 });

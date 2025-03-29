@@ -68,4 +68,8 @@ export class ConfigService {
   get cookieSecure(): boolean {
     return this.nestConfigService.get<boolean>('COOKIE_SECURE') || false;
   }
+
+  get cookieSameSite(): 'lax' | 'strict' | 'none' {
+    return this.nestConfigService.get<string>('COOKIE_SAME_SITE') as 'lax' | 'strict' | 'none' || 'strict';
+  }
 }

@@ -5,3 +5,8 @@ node_modules
 log.py
 output.txt
 setup.py
+docker-compose.test.yml
+.env
+Dockerfile.*.dev
+*.dev.*
+*.dev
