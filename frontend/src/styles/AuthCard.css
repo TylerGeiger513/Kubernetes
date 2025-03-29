@@ -9,7 +9,7 @@
 
 }
 
-/* The card container; height is controlled via inline style */
+/* The card container */
 .auth-card {
     position: relative;
     width: 100%;

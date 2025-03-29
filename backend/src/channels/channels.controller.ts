@@ -1,9 +1,11 @@
 import { Controller, Get, Post, Body, UseGuards, Param, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ChannelsService } from './channels.service';
+import { Logger } from '@nestjs/common';
 import { MessageService } from './message.service';
 import { ChannelsGuard } from './channels.guard';
 import { CreateMessageDto } from './dtos/create-message.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('channels')
 @UseGuards(ChannelsGuard)
@@ -11,6 +13,8 @@ export class ChannelsController {
     constructor(
         private readonly channelsService: ChannelsService,
         private readonly messageService: MessageService,
+        private readonly usersService: UsersService,
+        private readonly logger: Logger,
     ) { }
 
     /**
@@ -32,13 +36,18 @@ export class ChannelsController {
         if (!userId) {
             throw new ForbiddenException('User not authenticated.');
         }
+
+        const sender = await this.usersService.findUserByIdentifier({ id: userId });
+        if (!sender) {
+            throw new BadRequestException('Sender not found.');
+        }
         if (!dto.content || dto.content.trim() === '') {
             throw new BadRequestException('Message content is required.');
         }
         if (!dto['channelId']) {
             throw new BadRequestException('Channel identifier is required.');
         }
-        return this.messageService.sendMessage({ ...dto, senderId: userId });
+        return this.messageService.sendMessage({ ...dto, senderId: userId }, sender.username);
     }
 
     /**
@@ -49,12 +58,15 @@ export class ChannelsController {
         if (!channelId) {
             throw new BadRequestException('Channel identifier is required.');
         }
+        this.logger.log(`Fetching messages for channel: ${channelId}`);
         // Validate channel existence before proceeding.
-        const channel = await this.channelsService.getChannelById(channelId);
+        const userChannels = await this.channelsService.getChannelsForUser(userId);
+        const trimmedId = channelId.trim();
+        const channel = userChannels.find(c => c._id?.toString() === trimmedId);
         if (!channel) {
             throw new ForbiddenException('Channel not found.');
         }
-        return this.messageService.getMessages(channelId);
+        return { messages: await this.messageService.getMessages(channelId) };
     }
 
     /**
@@ -83,6 +95,8 @@ export class ChannelsController {
      */
     @Post('message/:messageId/delete')
     async deleteMessage(@Param('messageId') messageId: string, @CurrentUser() userId: string) {
+        messageId = messageId.trim();
+        this.logger.log(`UserID: ${userId}`)
         if (!messageId) {
             throw new BadRequestException('Message identifier is required.');
         }
@@ -97,6 +111,7 @@ export class ChannelsController {
      */
     @Post('channel/getDMChannel')
     async getDMChannel(@Body() dto: { userId: string }, @CurrentUser() userId: string) {
+        
         if (!userId) {
             throw new ForbiddenException('User not authenticated.');
         }

@@ -25,8 +25,8 @@ export class MessageService {
      * Sends a new message in a channel.
      * @param dto - Object containing channelId, senderId, and content.
      */
-    async sendMessage(dto: { channelId: string; senderId: string; content: string }): Promise<IMessage> {
-        const message = await this.messageRepository.sendMessage(dto);
+    async sendMessage(dto: { channelId: string; senderId: string; content: string}, senderUsername: string ): Promise<IMessage> {
+        const message = await this.messageRepository.sendMessage(dto, senderUsername);
         // Emit the event so that other parts (like the gateway) can broadcast it.
         this.eventEmitter.emit('message.sent', message);
         return message;

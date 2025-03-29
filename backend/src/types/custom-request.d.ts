@@ -9,4 +9,4 @@ declare global {
   }
 }
 
-export {}; // Ensures it is treated as a module
+export {}; 

@@ -12,5 +12,5 @@ COPY frontend/ ./
 ENV NODE_ENV=development
 EXPOSE ${FRONTEND_PORT}
 
-# Start the frontend dev server (e.g., Create React App)
+# Start the frontend dev server (Create React App)
 CMD ["npm", "run", "start"]

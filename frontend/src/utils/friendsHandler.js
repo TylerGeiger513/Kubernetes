@@ -1,6 +1,6 @@
 // friendsHandler.js
 
-import { api } from './api'; // Adjust the path if needed
+import { api } from './api'; 
 
 /**
  * Retrieves the current user's friends list.

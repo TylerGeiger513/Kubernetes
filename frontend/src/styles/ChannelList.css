@@ -1,6 +1,7 @@
 .channel-list {
-    background-color: var(--surface-a30);
+    background-color: var(--surface-a20);
     padding: 10px;
+    z-index: 1;
   }
   
   .channel-list h3 {

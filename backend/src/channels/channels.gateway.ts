@@ -11,7 +11,7 @@ import { Logger } from '@nestjs/common';
 import * as cookie from 'cookie';
 import { ConfigService } from '../config/config.service';
 import { SessionService } from '../session/session.service';
-import { EventEmitter2 } from '@nestjs/event-emitter'; // <-- Import EventEmitter2
+import { EventEmitter2 } from '@nestjs/event-emitter'; 
 
 /**
  * @class ChannelsGateway
@@ -36,8 +36,8 @@ export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect
     constructor(
         private readonly configService: ConfigService,
         private readonly sessionService: SessionService,
-        private readonly eventEmitter: EventEmitter2, // <-- Inject EventEmitter2
-    ) {}
+        private readonly eventEmitter: EventEmitter2, 
+    ) { }
 
     onModuleInit() {
         // Subscribe to the message.sent event
@@ -101,11 +101,7 @@ export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect
         return client;
     }
 
-    /**
-     * (Optional) If you want to process incoming 'sendMessage' events via WebSocket,
-     * you can have this handler call MessageService, which will emit the event.
-     * Otherwise, you can rely on your HTTP flow to trigger MessageService.sendMessage().
-     */
+ 
     @SubscribeMessage('sendMessage')
     async handleSendMessage(client: Socket, payload: { channelId: string; senderId: string; content: string }): Promise<void> {
         const { channelId, senderId, content } = payload;
@@ -113,8 +109,12 @@ export class ChannelsGateway implements OnGatewayConnection, OnGatewayDisconnect
             client.emit('error', 'Missing required fields in message payload');
             return;
         }
-        // In this minimal modification we simply log the receipt.
-        // The actual broadcasting is triggered by the MessageService event emitter.
         this.logger.log(`Received sendMessage from ${senderId} for channel ${channelId}`);
+    }
+
+    @SubscribeMessage('leaveChannel')
+    handleLeaveChannel(client: Socket, channelId: string): void {
+        client.leave(channelId);
+        this.logger.log(`Client ${client.id} left channel ${channelId}`);
     }
 }

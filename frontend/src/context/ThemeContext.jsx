@@ -40,7 +40,7 @@ export const darkTheme = {
   '--color-darker-red': '#fc422d',
   '--color-light-green': '#b7e9ce',
   '--color-darker-green': '#04aa4e',
-  '--color-text-alt': '#fff'
+  '--color-text-alt': '#BDBDBD'
 };
 
 export const ThemeContext = createContext({

@@ -1,14 +1,13 @@
 .friends-list {
   background-color: var(--surface-a20);
   overflow: hidden;
-  transition: width 0.3s ease, padding 0.3s ease;
+  transition: width 0.4s ease, padding 0.4s ease;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Expanded friends list */
 .friends-list.open {
   width: 250px;
-  padding: 10px;
 }
 
 /* Collapsed friends list */
@@ -20,12 +19,24 @@
   display: flex;
   justify-content: center;
   align-items: start;
-  padding-top: 10px;
+  padding: 0px;
 }
 .friends-list.collapsed .friends-header {
-  width: min-content;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-bottom: none;
 }
+
+.friends-list.open .friends-header {
+  display: grid; 
+  grid-template-columns: 40px 1fr; 
+  grid-template-rows: 1fr;
+  justify-items: center;
+  align-items: center;
+}
+
 
 /* Header styling */
 .friends-header {
@@ -33,9 +44,11 @@
   align-items: center;
   margin-bottom: 10px;
   width: 100%;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--color-text-alt);
+  height: 50px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  padding: 0;
 }
+
 
 .friends-header h3 {
   flex: 1;
@@ -61,7 +74,7 @@
   background: var(--primary-a30);
   opacity: 1;
   transform: rotate(0deg);
-  transition: 0.25s ease-in-out;
+  transition: 0.5s ease-in-out;
 }
 
 #friendsMenu span:nth-child(even) {
@@ -89,7 +102,6 @@
   top: 18px;
 }
 
-/* When the menu is expanded (i.e. sidebar open), add class "open" to #friendsMenu to form an X */
 #friendsMenu.open span:nth-child(1),
 #friendsMenu.open span:nth-child(6) {
   transform: rotate(45deg);
@@ -136,6 +148,7 @@
   display: flex;
   gap: 5px;
   margin-bottom: 10px;
+  padding: 10px;
 }
 
 .friends-add input {
@@ -151,7 +164,7 @@
 }
 
 .friends-add button {
-  padding: 5px 10px;
+  padding: 5px 5px;
   background-color: var(--primary-a30);
   color: #fff;
   border: none;
@@ -163,6 +176,7 @@
 
 /* Friends Section Styling */
 .friends-section {
+  padding: 10px;
   margin-bottom: 15px;
 }
 
@@ -253,7 +267,7 @@
 
 /* Empty message styling */
 .empty-message {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   color: var(--color-text-alt);
   font-style: italic;
   text-align: center;

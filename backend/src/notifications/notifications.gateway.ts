@@ -36,7 +36,7 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
     constructor(
         private readonly configService: ConfigService,
         private readonly sessionService: SessionService,
-        private readonly eventEmitter: EventEmitter2, // Inject EventEmitter2
+        private readonly eventEmitter: EventEmitter2, 
     ) { }
 
     onModuleInit() {
@@ -65,7 +65,6 @@ export class NotificationsGateway implements OnGatewayConnection, OnGatewayDisco
             }
             this.logger.log(`Client connected: rawCookie=${rawCookie}`);
 
-            // Retrieve session using the same method as in ChannelsGateway.
             const session = await this.sessionService.getSessionFromRawCookie(rawCookie);
             if (!session || !session.userId) {
                 this.logger.error('Unauthenticated session. Disconnecting client.');

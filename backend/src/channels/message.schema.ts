@@ -9,6 +9,7 @@ export interface IMessage {
     _id?: string;
     channelId: string;
     senderId: string;
+    senderName?: string;
     content: string;
     edited?: boolean;
     createdAt?: Date;
@@ -26,6 +27,9 @@ export class Message implements IMessage {
 
     @Prop({ required: true })
     senderId!: string;
+
+    @Prop({ required: false, type: String })
+    senderName?: string;
 
     @Prop({ required: true })
     content!: string;

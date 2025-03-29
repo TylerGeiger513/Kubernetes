@@ -15,9 +15,9 @@ export class MessageRepository {
     async getMessages(channelId: string): Promise<IMessage[]> {
         // Check if at least one message exists for the channel (or optionally check for channel existence in another way)
         const messageExists = await this.messageModel.exists({ channelId });
-        if (!messageExists) {
-            throw new ForbiddenException('Channel not found.');
-        }
+        // if (!messageExists) {
+        //     throw new ForbiddenException('Channel not found.');
+        // }
         // Retrieve all messages, sort them by createdAt, and lean() them to get plain JS objects.
         const messages = await this.messageModel.find({ channelId }).sort({ createdAt: 1 }).lean().exec();
         return messages.map(m => ({ ...m, _id: m._id.toString() }));
@@ -26,10 +26,14 @@ export class MessageRepository {
     /**
      * Creates (sends) a new message.
      */
-    async sendMessage(dto: Partial<IMessage>): Promise<IMessage> {
-        const created = new this.messageModel(dto);
+    async sendMessage(dto: Partial<IMessage>, senderUsername: string): Promise<IMessage> {
+        const created = new this.messageModel({
+            ...dto,
+            senderName: senderUsername,
+        });
         const saved = await created.save();
-        const plain = saved.toObject();
+        let plain = saved.toObject();
+        this.logger.log(`${plain}`)
         if (plain._id) {
             plain._id = plain._id.toString();
         }

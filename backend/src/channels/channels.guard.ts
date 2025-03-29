@@ -15,21 +15,32 @@ export class ChannelsGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const userId = request.session?.userId;
         const channelId = request.params?.channelId || request.body?.channelId;
-        if (bypassedEndpoints.some(regex => regex.test(request.route.path)) && userId) {
+        const routePath = request.route.path;
+
+        if (!userId) {
+            throw new ForbiddenException('Missing authentication.');
+        }
+
+        // Allow bypass for certain routes regardless of channelId
+        if (bypassedEndpoints.some(regex => regex.test(routePath))) {
             return true;
         }
 
-        if (!userId || !channelId) {
-            throw new ForbiddenException('Missing authentication or channel identifier.');
+        // If the route needs a channelId but it's missing
+        if (!channelId) {
+            return true; 
         }
 
         const channel = await this.channelsService.getChannelById(channelId);
         if (!channel) {
             throw new ForbiddenException('Channel not found.');
         }
+
         if (!channel.participants.includes(userId)) {
             throw new ForbiddenException('You are not a participant of this channel.');
         }
+
         return true;
     }
+
 }

@@ -4,3 +4,4 @@ node_modules
 **/dist
 log.py
 output.txt
+setup.py

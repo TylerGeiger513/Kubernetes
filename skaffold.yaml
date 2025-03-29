@@ -14,9 +14,28 @@ build:
       docker:
         dockerfile: Dockerfile.frontend.prod
 
-manifests:
-  rawYaml:
-    - kubernetes/*.yaml
-
 deploy:
-  kubectl: {}
+  helm:
+    releases:
+      - name: campus-connect
+        chartPath: ./helm
+        valuesFiles:
+          - ./helm/values.prod.yaml
+
+profiles:
+  - name: dev
+    deploy:
+      helm:
+        releases:
+          - name: campus-connect
+            chartPath: ./helm
+            valuesFiles:
+              - ./helm/values.prod.yaml
+  - name: prod
+    deploy:
+      helm:
+        releases:
+          - name: campus-connect
+            chartPath: ./helm
+            valuesFiles:
+              - ./helm/values.prod.yaml

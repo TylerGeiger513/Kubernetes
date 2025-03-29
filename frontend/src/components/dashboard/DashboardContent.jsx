@@ -1,11 +1,22 @@
+// src/components/DashboardContent.jsx
 import React from 'react';
+import ChatChannel from './ChatChannel';
 import '../../styles/DashboardContent.css';
 
-const DashboardContent = () => {
+const DashboardContent = ({ activeChannel, messages, newMessage, setNewMessage, sendMessage }) => {
   return (
     <div className="dashboard-content">
-      <h1>Dashboard Content</h1>
-      <p>This is where your main dashboard content will appear.</p>
+      {activeChannel ? (
+        <ChatChannel
+          channelId={activeChannel.id}
+          messages={messages}
+          newMessage={newMessage}
+          setNewMessage={setNewMessage}
+          sendMessage={sendMessage}
+        />
+      ) : (
+        <div className="no-active-channel">No active channel</div>
+      )}
     </div>
   );
 };

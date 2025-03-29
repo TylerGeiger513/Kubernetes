@@ -29,7 +29,6 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
-        {/* Add other routes as needed */}
       </Routes>
     </BrowserRouter>
   );

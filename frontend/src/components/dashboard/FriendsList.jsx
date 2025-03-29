@@ -1,3 +1,4 @@
+// src/components/FriendsList.jsx
 import React, { useState, useEffect } from 'react';
 import '../../styles/FriendsList.css';
 import {
@@ -8,12 +9,11 @@ import {
   denyFriendRequest,
 } from '../../utils/friendsHandler';
 
-const FriendsList = ({ isCollapsed, toggleCollapse }) => {
+const FriendsList = ({ isCollapsed, toggleCollapse, toggleFriendChannel, activeChannel }) => {
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [addFriendInput, setAddFriendInput] = useState('');
 
-  // Load friends and friend requests on mount.
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,9 +32,7 @@ const FriendsList = ({ isCollapsed, toggleCollapse }) => {
     if (!addFriendInput) return;
     try {
       await sendFriendRequest(addFriendInput);
-      console.log('Friend request sent to:', addFriendInput);
       setAddFriendInput('');
-      // Optionally, refresh friend requests after sending.
       const requestsData = await getIncomingRequests();
       setFriendRequests(requestsData.requests || []);
     } catch (error) {
@@ -45,10 +43,7 @@ const FriendsList = ({ isCollapsed, toggleCollapse }) => {
   const handleAccept = async (target) => {
     try {
       await acceptFriendRequest(target);
-      console.log('Accepted friend request from:', target);
-      // Remove accepted request from state.
       setFriendRequests((prev) => prev.filter((req) => req.id !== target));
-      // Optionally refresh friends list.
       const friendsData = await getFriendsList();
       setFriends(friendsData.friends || []);
     } catch (error) {
@@ -59,8 +54,6 @@ const FriendsList = ({ isCollapsed, toggleCollapse }) => {
   const handleDeny = async (target) => {
     try {
       await denyFriendRequest(target);
-      console.log('Denied friend request from:', target);
-      // Remove denied request from state.
       setFriendRequests((prev) => prev.filter((req) => req.id !== target));
     } catch (error) {
       console.error('Error denying friend request:', error);
@@ -86,7 +79,6 @@ const FriendsList = ({ isCollapsed, toggleCollapse }) => {
       </div>
       {!isCollapsed && (
         <>
-          {/* Add Friend Input Bar */}
           <div className="friends-add">
             <input
               type="text"
@@ -96,7 +88,6 @@ const FriendsList = ({ isCollapsed, toggleCollapse }) => {
             />
             <button onClick={handleSendRequest}>SEND</button>
           </div>
-          {/* Friend Requests Section */}
           <div className="friends-section">
             <div className="section-label">Friend Requests</div>
             <div className="friends-body">
@@ -132,7 +123,6 @@ const FriendsList = ({ isCollapsed, toggleCollapse }) => {
               )}
             </div>
           </div>
-          {/* Friends List Section */}
           <div className="friends-section">
             <div className="section-label">Friends</div>
             <div className="friends-body">
@@ -143,7 +133,11 @@ const FriendsList = ({ isCollapsed, toggleCollapse }) => {
               ) : (
                 <ul>
                   {friends.map((friend) => (
-                    <li key={friend.id} className="friend-item">
+                    <li
+                      key={friend.id}
+                      className={`friend-item ${activeChannel && activeChannel.friendId === friend.id ? 'active' : ''}`}
+                      onClick={() => toggleFriendChannel(friend.id)}
+                    >
                       <div className="friend-pfp">
                         {friend.username.charAt(0).toUpperCase()}
                       </div>
