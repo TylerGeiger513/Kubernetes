@@ -1,7 +1,5 @@
-routes:
+Full Documentation can be found here
+https://tylergeiger513.github.io/CampusConnect-Prod/
 
-1. /
-2. /signup
-3. /login
-4. /home
-5. /profile
+Our production code can be found at
+https://tylergeiger513.github.io/CampusConnect-Prod/
