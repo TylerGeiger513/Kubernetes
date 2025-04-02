@@ -1,0 +1,96 @@
+/* Groups-specific styles */
+.group-header {
+    margin-bottom: 12px;
+  }
+
+
+  
+  .group-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .group-title h2 {
+    font-size: 16px;
+    margin: 0;
+    color: white;
+  }
+
+  .group-title-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  
+  .member-count {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #aaa;
+    font-size: 14px;
+  }
+  
+  .group-description {
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 12px 0;
+  }
+  
+  .join-button {
+    background-color: #444;
+    border: none;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+  }
+  
+  .join-button:hover {
+    background-color: #555;
+  }
+
+  .group-icon {
+    color: #aaa;
+    min-width: 24px;
+    font-size: 18px;
+  }
+
+  .university-icon {
+    color: #aaa;
+    width: 24px;
+    height: 24px;
+  }
+
+  .member-count svg {
+    color: #aaa;
+    margin-bottom: -2px;
+  }
+
+  .university-feed {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #333;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 0 8px 8px;
+  }
+
+  .feed-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #666 #333;
+  }
+
+
+
+  
+  
