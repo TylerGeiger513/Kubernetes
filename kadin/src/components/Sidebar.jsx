@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, User, BookOpen, Calendar, Settings, School } from 'lucide-react';
+import { Home, User, MessageCircle, Settings} from 'lucide-react';
 import './Sidebar.css';
 
 const Sidebar = () => {
@@ -8,16 +8,18 @@ const Sidebar = () => {
   const navItems = [
     { id: 'Home', icon: Home, label: 'Home' },
     { id: 'Profile', icon: User, label: 'Profile' },
-    { id: 'Courses', icon: BookOpen, label: 'Courses' },
-    { id: 'Schedule', icon: Calendar, label: 'Schedule' },
+    { id: 'Chats', icon: MessageCircle, label: 'Chats' },
     { id: 'Settings', icon: Settings, label: 'Settings' },
   ];
 
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <School className="university-icon" size={28} />
-        <h2>Campus Connect</h2>
+        <img 
+          src="/LogoTransparent.png" 
+          alt="Campus Connect Logo" 
+          className="sidebar-logo"
+        />
       </div>
 
       <nav className="sidebar-nav">
@@ -38,7 +40,7 @@ const Sidebar = () => {
 
       <div className="sidebar-profile">
         <img 
-          src="/api/placeholder/40/40" 
+          src="https://t3.ftcdn.net/jpg/02/43/12/34/240_F_243123463_zTooub557xEWABDLk0jJklDyLSGl2jrr.jpg" 
           alt="Profile" 
           className="profile-image" 
         />

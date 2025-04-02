@@ -1,8 +1,7 @@
-/* App.css */
 .App {
   min-height: 100vh;
   background-color: #505050;
-  overflow: hidden; /* Prevent whole page scrolling */
+  overflow: hidden; 
 }
 
 .main-content {
@@ -10,7 +9,7 @@
   display: flex;
   gap: 32px;
   padding: 24px;
-  height: calc(100vh - 48px); /* Account for padding */
+  height: calc(100vh - 48px); 
 }
 
 @media (max-width: 768px) {

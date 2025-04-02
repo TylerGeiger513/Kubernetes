@@ -1,4 +1,3 @@
-// UniversityGroups.jsx
 import React from 'react';
 import { 
   FaUsers, 
